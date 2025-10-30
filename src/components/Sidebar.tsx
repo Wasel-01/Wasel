@@ -31,7 +31,7 @@ const mainMenuItems = [
   { id: 'dashboard', label: 'Dashboard', labelAr: 'لوحة التحكم', icon: LayoutDashboard },
   { id: 'find-ride', label: 'Find a Ride', labelAr: 'ابحث عن رحلة', icon: Search },
   { id: 'offer-ride', label: 'Offer a Ride', labelAr: 'اعرض رحلة', icon: PlusCircle },
-  { id: 'navigation', label: 'Smart Navigation', labelAr: 'الملاحة الذكية', icon: BarChart3 },
+  { id: 'navigation', label: 'Smart Navigation', labelAr: 'الملاحة الذكية', icon: Navigation },
   { id: 'my-trips', label: 'My Trips', labelAr: 'رحلاتي', icon: Calendar },
   { id: 'recurring', label: 'Recurring Trips', labelAr: 'رحلات متكررة', icon: Repeat },
   { id: 'messages', label: 'Messages', labelAr: 'الرسائل', icon: MessageCircle },
