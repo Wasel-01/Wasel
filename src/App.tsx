@@ -16,6 +16,10 @@ const SafetyCenter = lazy(() => import('./components/SafetyCenter').then(m => ({
 const TripAnalytics = lazy(() => import('./components/TripAnalytics').then(m => ({ default: m.TripAnalytics })));
 const RecurringTrips = lazy(() => import('./components/RecurringTrips').then(m => ({ default: m.RecurringTrips })));
 const VerificationCenter = lazy(() => import('./components/VerificationCenter').then(m => ({ default: m.VerificationCenter })));
+const ReferralProgram = lazy(() => import('./components/ReferralProgram'));
+const GrowthMetricsDashboard = lazy(() => import('./components/GrowthMetricsDashboard'));
+const IncentiveCampaigns = lazy(() => import('./components/IncentiveCampaigns'));
+const NavigationHub = lazy(() => import('./components/NavigationHub'));
 import { Toaster } from './components/ui/sonner';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ResetPassword from './components/ResetPassword';
@@ -83,6 +87,18 @@ function AppContent() {
         return <RecurringTrips />;
       case 'verification':
         return <VerificationCenter />;
+      case 'referrals':
+        return <ReferralProgram />;
+      case 'growth-metrics':
+        return <GrowthMetricsDashboard />;
+      case 'incentives':
+        return <IncentiveCampaigns />;
+      case 'navigation':
+        return <NavigationHub 
+          origin={[55.2708, 25.2048]} 
+          destination={[55.3708, 25.3048]} 
+          waypoints={[[55.3208, 25.2548]]}
+        />;
       default:
         return <Dashboard onNavigate={setCurrentPage} />;
     }

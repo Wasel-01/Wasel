@@ -12,7 +12,10 @@ import {
   Shield,
   TrendingUp,
   Repeat,
-  CheckCircle
+  CheckCircle,
+  Gift,
+  BarChart3,
+  Navigation
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { Separator } from './ui/separator';
@@ -28,6 +31,7 @@ const mainMenuItems = [
   { id: 'dashboard', label: 'Dashboard', labelAr: 'لوحة التحكم', icon: LayoutDashboard },
   { id: 'find-ride', label: 'Find a Ride', labelAr: 'ابحث عن رحلة', icon: Search },
   { id: 'offer-ride', label: 'Offer a Ride', labelAr: 'اعرض رحلة', icon: PlusCircle },
+  { id: 'navigation', label: 'Smart Navigation', labelAr: 'الملاحة الذكية', icon: BarChart3 },
   { id: 'my-trips', label: 'My Trips', labelAr: 'رحلاتي', icon: Calendar },
   { id: 'recurring', label: 'Recurring Trips', labelAr: 'رحلات متكررة', icon: Repeat },
   { id: 'messages', label: 'Messages', labelAr: 'الرسائل', icon: MessageCircle },
@@ -36,11 +40,17 @@ const mainMenuItems = [
 const accountMenuItems = [
   { id: 'profile', label: 'My Profile', labelAr: 'ملفي الشخصي', icon: User },
   { id: 'analytics', label: 'Analytics', labelAr: 'التحليلات', icon: TrendingUp },
+  { id: 'referrals', label: 'Referrals', labelAr: 'الإحالات', icon: Gift },
   { id: 'payments', label: 'Payments', labelAr: 'المدفوعات', icon: CreditCard },
   { id: 'notifications', label: 'Notifications', labelAr: 'الإشعارات', icon: Bell },
   { id: 'verification', label: 'Verification', labelAr: 'التحقق', icon: CheckCircle },
   { id: 'safety', label: 'Safety Center', labelAr: 'مركز الأمان', icon: Shield },
   { id: 'settings', label: 'Settings', labelAr: 'الإعدادات', icon: Settings },
+];
+
+const adminMenuItems = [
+  { id: 'growth-metrics', label: 'Growth Metrics', labelAr: 'مقاييس النمو', icon: BarChart3 },
+  { id: 'incentives', label: 'Incentive Campaigns', labelAr: 'حملات التحفيز', icon: Gift },
 ];
 
 export function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarProps) {
@@ -110,6 +120,39 @@ export function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarPro
                 Account
               </p>
               {accountMenuItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = currentPage === item.id;
+                
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      onNavigate(item.id);
+                      onClose();
+                    }}
+                    className={`
+                      w-full flex items-center gap-3 px-4 py-3 rounded-lg
+                      transition-colors
+                      ${isActive 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'text-gray-700 hover:bg-gray-100'
+                      }
+                    `}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <Separator className="my-4" />
+
+            <div className="space-y-1">
+              <p className="px-4 text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                Admin
+              </p>
+              {adminMenuItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = currentPage === item.id;
                 
