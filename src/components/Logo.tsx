@@ -1,4 +1,5 @@
-import wasselLogo from 'figma:asset/1ccf434105a811706fd618a3b652ae052ecf47e1.png';
+import { useState } from 'react';
+import { brand } from '../brand/brand';
 
 interface LogoProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -16,17 +17,23 @@ const sizeMap = {
 };
 
 export function Logo({ size = 'sm', showText = true, className = '' }: LogoProps) {
+  const [imgSrc, setImgSrc] = useState(
+    brand.logo.preferOriginal ? brand.logo.originalPublicPath : brand.logo.primarySvg()
+  );
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
-      <img 
-        src={wasselLogo} 
-        alt="Wassel" 
-        className={`${sizeMap[size]} w-auto`}
+      <img
+        src={imgSrc}
+        alt={brand.logo.alt}
+        className={`${sizeMap[size]} w-auto rounded-xl`}
+        loading="eager"
+        decoding="async"
+        onError={() => setImgSrc(brand.logo.primarySvg())}
       />
       {showText && (
         <div>
-          <h3 className="text-primary leading-tight">Wassel</h3>
-          <p className="text-sm text-muted-foreground leading-tight">واصل</p>
+          <h3 className="text-primary leading-tight">{brand.name}</h3>
+          <p className="text-sm text-muted-foreground leading-tight">{brand.taglineAr}</p>
         </div>
       )}
     </div>

@@ -19,7 +19,7 @@ import {
   Clock,
   XCircle
 } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 type VerificationStatus = 'not_started' | 'pending' | 'approved' | 'rejected';
 

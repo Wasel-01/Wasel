@@ -10,7 +10,7 @@ import { Slider } from './ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 import { TripDetailsDialog } from './TripDetailsDialog';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 export function FindRide() {
   const [searchFrom, setSearchFrom] = useState('');

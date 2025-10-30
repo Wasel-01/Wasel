@@ -2,7 +2,6 @@ import { ArrowRight, Users, Shield, DollarSign, Leaf, Star, MapPin } from 'lucid
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Logo } from './Logo';
-import wasselLogo from 'figma:asset/1ccf434105a811706fd618a3b652ae052ecf47e1.png';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -75,7 +74,7 @@ export function LandingPage({ onGetStarted, onLogin }: LandingPageProps) {
           </div>
           <div className="relative">
             <div className="bg-gradient-to-br from-primary/80 to-primary rounded-3xl p-12 shadow-2xl flex items-center justify-center">
-              <img src={wasselLogo} alt="Wassel Platform" className="w-64 h-auto" />
+              <Logo size="xl" showText={false} />
             </div>
             <div className="mt-6 text-center">
               <p className="text-xl text-gray-700">Connecting Travelers</p>

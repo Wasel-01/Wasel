@@ -4,7 +4,6 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { WorkflowGuide } from './WorkflowGuide';
 import { Logo } from './Logo';
-import wasselLogo from 'figma:asset/1ccf434105a811706fd618a3b652ae052ecf47e1.png';
 
 interface DashboardProps {
   onNavigate: (page: string) => void;
@@ -18,7 +17,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="flex items-center gap-4">
             <div className="bg-white rounded-xl p-3 shadow-lg">
-              <img src={wasselLogo} alt="Wassel" className="h-12 w-auto" />
+              <Logo size="md" showText={false} />
             </div>
             <div>
               <h1 className="text-white">
