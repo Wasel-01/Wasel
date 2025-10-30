@@ -1,28 +1,33 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { LandingPage } from './components/LandingPage';
 import { AuthPage } from './components/AuthPage';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
-import { Dashboard } from './components/Dashboard';
-import { FindRide } from './components/FindRide';
-import { OfferRide } from './components/OfferRide';
-import { MyTrips } from './components/MyTrips';
-import { Messages } from './components/Messages';
-import { Payments } from './components/Payments';
-import { Settings } from './components/Settings';
-import { UserProfile } from './components/UserProfile';
-import { NotificationCenter } from './components/NotificationCenter';
-import { SafetyCenter } from './components/SafetyCenter';
-import { TripAnalytics } from './components/TripAnalytics';
-import { RecurringTrips } from './components/RecurringTrips';
-import { VerificationCenter } from './components/VerificationCenter';
+const Dashboard = lazy(() => import('./components/Dashboard').then(m => ({ default: m.Dashboard })));
+const FindRide = lazy(() => import('./components/FindRide').then(m => ({ default: m.FindRide })));
+const OfferRide = lazy(() => import('./components/OfferRide').then(m => ({ default: m.OfferRide })));
+const MyTrips = lazy(() => import('./components/MyTrips').then(m => ({ default: m.MyTrips })));
+const Messages = lazy(() => import('./components/Messages').then(m => ({ default: m.Messages })));
+const Payments = lazy(() => import('./components/Payments').then(m => ({ default: m.Payments })));
+const Settings = lazy(() => import('./components/Settings').then(m => ({ default: m.Settings })));
+const UserProfile = lazy(() => import('./components/UserProfile').then(m => ({ default: m.UserProfile })));
+const NotificationCenter = lazy(() => import('./components/NotificationCenter').then(m => ({ default: m.NotificationCenter })));
+const SafetyCenter = lazy(() => import('./components/SafetyCenter').then(m => ({ default: m.SafetyCenter })));
+const TripAnalytics = lazy(() => import('./components/TripAnalytics').then(m => ({ default: m.TripAnalytics })));
+const RecurringTrips = lazy(() => import('./components/RecurringTrips').then(m => ({ default: m.RecurringTrips })));
+const VerificationCenter = lazy(() => import('./components/VerificationCenter').then(m => ({ default: m.VerificationCenter })));
 import { Toaster } from './components/ui/sonner';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import ResetPassword from './components/ResetPassword';
 
 type AppFlow = 'landing' | 'auth' | 'app';
 
 function AppContent() {
   const { user, loading, isBackendConnected } = useAuth();
+  // Dedicated reset password route (for Supabase redirect)
+  if (typeof window !== 'undefined' && window.location.pathname === '/reset-password') {
+    return <ResetPassword />;
+  }
   const [appFlow, setAppFlow] = useState<AppFlow>('landing');
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -135,7 +140,16 @@ function AppContent() {
         <div className="flex-1 flex flex-col min-w-0">
           <Header onMenuClick={() => setIsSidebarOpen(true)} onNavigate={setCurrentPage} />
           <main className="flex-1 overflow-auto p-6 lg:p-8">
+            <Suspense fallback={
+              <div className="flex items-center justify-center py-16">
+                <div className="text-center">
+                  <div className="size-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                  <p className="text-sm text-muted-foreground">Loading...</p>
+                </div>
+              </div>
+            }>
             {renderPage()}
+            </Suspense>
           </main>
         </div>
       </div>

@@ -11,7 +11,7 @@ import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Avatar } from './ui/avatar';
 import { Star, ThumbsUp, MessageSquare, Clock, Car, User } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface RatingDialogProps {
   open: boolean;

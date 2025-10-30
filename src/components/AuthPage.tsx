@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Mail, Lock, User, Phone, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, User, Phone, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { authAPI } from '../services/api';
+import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Button } from './ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import wasselLogo from 'figma:asset/1ccf434105a811706fd618a3b652ae052ecf47e1.png';
 import { Logo } from './Logo';
 
 interface AuthPageProps {
@@ -16,15 +17,68 @@ interface AuthPageProps {
 
 export function AuthPage({ onSuccess, onBack, initialTab = 'signup' }: AuthPageProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string; phone?: string; confirmPassword?: string }>({});
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showSignupConfirm, setShowSignupConfirm] = useState(false);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const firstErrorRef = useState<HTMLInputElement | null>(null)[0];
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const getPasswordStrength = (pwd: string) => {
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    return score; // 0-4
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const form = e.currentTarget;
+    const data = new FormData(form);
+    const email = String(data.get('email') || '');
+    const password = String(data.get('password') || '');
+    const phone = String(data.get('phone') || '');
+    const confirmPassword = String(data.get('confirm_password') || '');
+
+    const newErrors: { email?: string; password?: string; phone?: string; confirmPassword?: string } = {};
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = 'Enter a valid email';
+    if (password.length < 8) newErrors.password = 'Minimum 8 characters';
+    if (phone && !/^\+?[0-9\s-]{7,}$/.test(phone)) newErrors.phone = 'Enter a valid phone';
+    if (form.dataset.mode === 'signup' && confirmPassword !== password) newErrors.confirmPassword = 'Passwords do not match';
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      const firstInvalid = form.querySelector('[aria-invalid="true"]') as HTMLInputElement | null;
+      if (firstInvalid) firstInvalid.focus();
+      return;
+    }
+
     setIsLoading(true);
-    // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
       onSuccess();
-    }, 1500);
+    }, 800);
+  };
+
+  const handleForgotPassword = async () => {
+    const emailInput = document.querySelector('form[data-mode="login"] input[name="email"]') as HTMLInputElement | null;
+    const email = emailInput?.value || '';
+    if (!email) {
+      setErrors(e => ({ ...e, email: 'Enter your email to reset password' }));
+      emailInput?.focus();
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setErrors(e => ({ ...e, email: 'Enter a valid email' }));
+      emailInput?.focus();
+      return;
+    }
+    try {
+      await authAPI.resetPassword(email);
+      toast.success('Password reset email sent. Check your inbox.');
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to send reset email');
+    }
   };
 
   return (
@@ -55,15 +109,15 @@ export function AuthPage({ onSuccess, onBack, initialTab = 'signup' }: AuthPageP
               </TabsList>
 
               <TabsContent value="signup">
-                <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+                <form onSubmit={handleSubmit} className="space-y-4 mt-4" data-mode="signup" aria-live="polite">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>First Name</Label>
-                      <Input placeholder="Ahmed" required />
+                      <Input placeholder="Ahmed" required autoComplete="given-name" name="first_name" />
                     </div>
                     <div className="space-y-2">
                       <Label>Last Name</Label>
-                      <Input placeholder="Hassan" required />
+                      <Input placeholder="Hassan" required autoComplete="family-name" name="last_name" />
                     </div>
                   </div>
 
@@ -75,8 +129,13 @@ export function AuthPage({ onSuccess, onBack, initialTab = 'signup' }: AuthPageP
                         type="email" 
                         placeholder="ahmed@example.com" 
                         className="pl-10"
+                        name="email"
+                        autoComplete="email"
                         required 
+                        aria-invalid={!!errors.email}
+                        aria-describedby={errors.email ? 'signup-email-error' : undefined}
                       />
+                      {errors.email && <p id="signup-email-error" className="mt-1 text-sm text-red-600">{errors.email}</p>}
                     </div>
                   </div>
 
@@ -88,8 +147,13 @@ export function AuthPage({ onSuccess, onBack, initialTab = 'signup' }: AuthPageP
                         type="tel" 
                         placeholder="+971 50 123 4567" 
                         className="pl-10"
+                        name="phone"
+                        autoComplete="tel"
                         required 
+                        aria-invalid={!!errors.phone}
+                        aria-describedby={errors.phone ? 'signup-phone-error' : undefined}
                       />
+                      {errors.phone && <p id="signup-phone-error" className="mt-1 text-sm text-red-600">{errors.phone}</p>}
                     </div>
                   </div>
 
@@ -98,11 +162,22 @@ export function AuthPage({ onSuccess, onBack, initialTab = 'signup' }: AuthPageP
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <Input 
-                        type="password" 
+                        type={showSignupPassword ? 'text' : 'password'} 
                         placeholder="••••••••" 
                         className="pl-10"
+                        name="password"
+                        autoComplete="new-password"
                         required 
+                        aria-invalid={!!errors.password}
+                        aria-describedby={errors.password ? 'signup-password-error' : 'signup-password-hint'}
                       />
+                      <button type="button" aria-label={showSignupPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500" onClick={() => setShowSignupPassword(v => !v)}>
+                        {showSignupPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                      {errors.password && <p id="signup-password-error" className="mt-1 text-sm text-red-600">{errors.password}</p>}
+                      {!errors.password && (
+                        <p id="signup-password-hint" className="mt-1 text-xs text-gray-500">Min 8 chars, include uppercase, number, and symbol for best security.</p>
+                      )}
                     </div>
                   </div>
 
@@ -111,11 +186,19 @@ export function AuthPage({ onSuccess, onBack, initialTab = 'signup' }: AuthPageP
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <Input 
-                        type="password" 
+                        type={showSignupConfirm ? 'text' : 'password'} 
                         placeholder="••••••••" 
                         className="pl-10"
+                        name="confirm_password"
+                        autoComplete="new-password"
+                        aria-invalid={!!errors.confirmPassword}
+                        aria-describedby={errors.confirmPassword ? 'signup-confirm-error' : undefined}
                         required 
                       />
+                      <button type="button" aria-label={showSignupConfirm ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500" onClick={() => setShowSignupConfirm(v => !v)}>
+                        {showSignupConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                      {errors.confirmPassword && <p id="signup-confirm-error" className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
                     </div>
                   </div>
 
@@ -137,7 +220,7 @@ export function AuthPage({ onSuccess, onBack, initialTab = 'signup' }: AuthPageP
               </TabsContent>
 
               <TabsContent value="login">
-                <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+                <form onSubmit={handleSubmit} className="space-y-4 mt-4" data-mode="login" aria-live="polite">
                   <div className="space-y-2">
                     <Label>Email</Label>
                     <div className="relative">
@@ -146,26 +229,39 @@ export function AuthPage({ onSuccess, onBack, initialTab = 'signup' }: AuthPageP
                         type="email" 
                         placeholder="ahmed@example.com" 
                         className="pl-10"
+                        name="email"
+                        autoComplete="email"
                         required 
+                        aria-invalid={!!errors.email}
+                        aria-describedby={errors.email ? 'login-email-error' : undefined}
                       />
+                      {errors.email && <p id="login-email-error" className="mt-1 text-sm text-red-600">{errors.email}</p>}
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label>Password</Label>
-                      <button type="button" className="text-sm text-teal-600 hover:text-teal-700">
+                      <button type="button" className="text-sm text-teal-600 hover:text-teal-700" onClick={handleForgotPassword}>
                         Forgot?
                       </button>
                     </div>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <Input 
-                        type="password" 
+                        type={showLoginPassword ? 'text' : 'password'} 
                         placeholder="••••••••" 
                         className="pl-10"
+                        name="password"
+                        autoComplete="current-password"
                         required 
+                        aria-invalid={!!errors.password}
+                        aria-describedby={errors.password ? 'login-password-error' : undefined}
                       />
+                      <button type="button" aria-label={showLoginPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500" onClick={() => setShowLoginPassword(v => !v)}>
+                        {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                      {errors.password && <p id="login-password-error" className="mt-1 text-sm text-red-600">{errors.password}</p>}
                     </div>
                   </div>
 

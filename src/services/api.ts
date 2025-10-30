@@ -1,5 +1,5 @@
 import { projectId, publicAnonKey } from '../utils/supabase/info';
-import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { createClient } from '@supabase/supabase-js';
 
 const API_URL = `https://${projectId}.supabase.co/functions/v1/make-server-cdfdab65`;
 
@@ -81,6 +81,15 @@ export const authAPI = {
     }
 
     return await response.json();
+  },
+
+  async resetPassword(email: string) {
+    const redirectTo = `${window.location.origin}/reset-password`;
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo
+    });
+    if (error) throw error;
+    return data;
   }
 };
 

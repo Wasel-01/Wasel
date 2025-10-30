@@ -46,6 +46,10 @@ npm install @supabase/supabase-js
 ### 2. Create Environment File
 
 ```bash
+# Create .env in project root
+# Windows PowerShell
+Copy-Item .env.example .env
+# macOS/Linux
 cp .env.example .env
 ```
 
