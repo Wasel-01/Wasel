@@ -60,7 +60,7 @@ export default function ARNavigationOverlay({
         startCalibration();
       }
     } catch (error) {
-      console.error('Camera access denied:', error);
+      // Camera access denied
       setCameraPermission('denied');
     }
   };

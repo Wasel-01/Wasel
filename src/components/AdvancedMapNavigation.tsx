@@ -122,7 +122,7 @@ export default function AdvancedMapNavigation({
               });
             }
           },
-          (error) => console.error('Location error:', error),
+          () => {}, // Location error
           { enableHighAccuracy: true, maximumAge: 1000 }
         );
       }

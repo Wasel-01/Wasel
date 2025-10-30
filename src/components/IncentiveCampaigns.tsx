@@ -19,7 +19,7 @@ export default function IncentiveCampaigns() {
       const data = await referralService.getActiveCampaigns();
       setCampaigns(data || []);
     } catch (error) {
-      console.error('Failed to load campaigns:', error);
+      // Failed to load campaigns
     } finally {
       setLoading(false);
     }
@@ -80,7 +80,7 @@ export default function IncentiveCampaigns() {
       try {
         await referralService.createCampaign(campaign);
       } catch (error) {
-        console.error('Failed to create campaign:', error);
+        // Failed to create campaign
       }
     }
     

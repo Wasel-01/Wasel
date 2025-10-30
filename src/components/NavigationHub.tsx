@@ -68,7 +68,6 @@ export default function NavigationHub({
   ];
 
   const handleRouteSelect = (route: any) => {
-    console.log('Selected route:', route);
     // Handle route selection logic
   };
 
@@ -211,7 +210,7 @@ export default function NavigationHub({
             destination={destination}
             waypoints={waypoints}
             isActive={activeMode === 'advanced'}
-            onNavigationUpdate={(step) => console.log('Navigation update:', step)}
+            onNavigationUpdate={() => {}}
           />
         </TabsContent>
 

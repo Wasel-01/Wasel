@@ -59,7 +59,7 @@ export function useBookings(filters?: {
       setBookings(data || []);
       setError(null);
     } catch (err: any) {
-      console.error('Error fetching bookings:', err);
+      // Error fetching bookings
       setError(err.message);
     } finally {
       setLoading(false);
@@ -96,7 +96,7 @@ export function useBookings(filters?: {
 
       return { data, error: null };
     } catch (err: any) {
-      console.error('Error creating booking:', err);
+      // Error creating booking
       return { data: null, error: err.message };
     }
   };
@@ -116,7 +116,7 @@ export function useBookings(filters?: {
 
       return { data, error: null };
     } catch (err: any) {
-      console.error('Error updating booking:', err);
+      // Error updating booking
       return { data: null, error: err.message };
     }
   };

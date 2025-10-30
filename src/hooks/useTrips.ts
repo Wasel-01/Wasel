@@ -62,9 +62,9 @@ export function useTrips(filters?: {
 
       setTrips(data || []);
       setError(null);
-    } catch (err: any) {
-      console.error('Error fetching trips:', err);
-      setError(err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to fetch trips';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -84,9 +84,9 @@ export function useTrips(filters?: {
       await fetchTrips();
 
       return { data, error: null };
-    } catch (err: any) {
-      console.error('Error creating trip:', err);
-      return { data: null, error: err.message };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to create trip';
+      return { data: null, error: message };
     }
   };
 
@@ -105,9 +105,9 @@ export function useTrips(filters?: {
       await fetchTrips();
 
       return { data, error: null };
-    } catch (err: any) {
-      console.error('Error updating trip:', err);
-      return { data: null, error: err.message };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to update trip';
+      return { data: null, error: message };
     }
   };
 
@@ -124,9 +124,9 @@ export function useTrips(filters?: {
       await fetchTrips();
 
       return { error: null };
-    } catch (err: any) {
-      console.error('Error deleting trip:', err);
-      return { error: err.message };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to delete trip';
+      return { error: message };
     }
   };
 
@@ -179,9 +179,9 @@ export function useSearchTrips(searchParams: {
 
       setTrips(data || []);
       setError(null);
-    } catch (err: any) {
-      console.error('Error searching trips:', err);
-      setError(err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to search trips';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -221,7 +221,6 @@ export function useTrip(tripId: string | null) {
           filter: `id=eq.${tripId}`,
         },
         (payload) => {
-          console.log('Trip updated:', payload);
           if (payload.eventType === 'DELETE') {
             setTrip(null);
           } else {
@@ -260,9 +259,9 @@ export function useTrip(tripId: string | null) {
 
       setTrip(data);
       setError(null);
-    } catch (err: any) {
-      console.error('Error fetching trip:', err);
-      setError(err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to fetch trip';
+      setError(message);
     } finally {
       setLoading(false);
     }
