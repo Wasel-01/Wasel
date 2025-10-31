@@ -27,7 +27,7 @@ export function useReferrals() {
       setReferrals(refs || []);
       setRewards(rwds || []);
     } catch (error) {
-      console.error('Failed to load referral data:', error);
+      // Failed to load referral data
     } finally {
       setLoading(false);
     }

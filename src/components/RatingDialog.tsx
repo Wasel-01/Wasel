@@ -85,14 +85,7 @@ export function RatingDialog({ open, onOpenChange, trip }: RatingDialogProps) {
       return;
     }
 
-    // Submit rating
-    console.log({
-      tripId: trip.id,
-      overallRating,
-      categories,
-      comment,
-      quickTags
-    });
+    // Submit rating - would send to backend
 
     toast.success('Thank you for your feedback!');
     onOpenChange(false);

@@ -41,33 +41,7 @@ export const growthMetricsService = {
     return data || [];
   },
 
-  // Get current supply/demand balance
-  async getSupplyDemandBalance(city?: string): Promise<SupplyDemandMetrics> {
-    const today = new Date().toISOString().split('T')[0];
-    const currentHour = new Date().getHours();
-    
-    let query = supabase
-      .from('supply_demand_metrics')
-      .select('*')
-      .eq('metric_date', today)
-      .eq('metric_hour', currentHour);
-    
-    if (city) query = query.eq('city', city);
-    
-    const { data, error } = await query.single();
-    
-    if (error || !data) {
-      return {
-        active_drivers: 0,
-        active_riders: 0,
-        supply_demand_ratio: 0,
-        fulfillment_rate: 0,
-        avg_wait_time_minutes: 0
-      };
-    }
-    
-    return data;
-  },
+
 
   // Calculate user LTV
   async calculateUserLTV(userId: string): Promise<number> {
@@ -177,11 +151,100 @@ export const growthMetricsService = {
     
     const supplyDemand = await this.getSupplyDemandBalance();
     
+    // Calculate real-time metrics if daily data not available
+    let cpa = dailyMetrics?.avg_cpa || 0;
+    let ltv = dailyMetrics?.avg_ltv || 0;
+    
+    if (!dailyMetrics) {
+      cpa = await this.calculateCurrentCPA();
+      ltv = await this.calculateCurrentLTV();
+    }
+    
     return {
-      cpa: dailyMetrics?.avg_cpa || 0,
-      ltv: dailyMetrics?.avg_ltv || 0,
+      cpa,
+      ltv,
       supplyDemandRatio: supplyDemand.supply_demand_ratio,
       fulfillmentRate: supplyDemand.fulfillment_rate
+    };
+  },
+
+  // Calculate current CPA
+  async calculateCurrentCPA(): Promise<number> {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    
+    const { data: acquisitionData } = await supabase
+      .from('user_acquisition_metrics')
+      .select('acquisition_cost')
+      .gte('created_at', thirtyDaysAgo);
+    
+    if (!acquisitionData?.length) return 0;
+    
+    const totalCost = acquisitionData.reduce((sum, user) => sum + (user.acquisition_cost || 0), 0);
+    return totalCost / acquisitionData.length;
+  },
+
+  // Calculate current LTV
+  async calculateCurrentLTV(): Promise<number> {
+    const { data: ltvData } = await supabase
+      .from('user_ltv_metrics')
+      .select('total_revenue, days_active')
+      .order('calculated_at', { ascending: false })
+      .limit(1000);
+    
+    if (!ltvData?.length) return 0;
+    
+    const avgRevenue = ltvData.reduce((sum, user) => sum + user.total_revenue, 0) / ltvData.length;
+    const avgDaysActive = ltvData.reduce((sum, user) => sum + user.days_active, 0) / ltvData.length;
+    
+    // Annualized LTV
+    return avgDaysActive > 0 ? (avgRevenue / avgDaysActive) * 365 : avgRevenue;
+  },
+
+  // Get supply/demand balance with additional metrics
+  async getSupplyDemandBalance(city?: string): Promise<SupplyDemandMetrics & {
+    total_seats_offered: number;
+    total_seats_requested: number;
+  }> {
+    const today = new Date().toISOString().split('T')[0];
+    const currentHour = new Date().getHours();
+    
+    // Get current active supply and demand
+    const [supplyQuery, demandQuery] = await Promise.all([
+      supabase
+        .from('ride_offers')
+        .select('available_seats')
+        .eq('status', 'active')
+        .gte('departure_time', new Date().toISOString()),
+      supabase
+        .from('ride_requests')
+        .select('seats_needed')
+        .eq('status', 'pending')
+        .gte('needed_by', new Date().toISOString())
+    ]);
+    
+    const totalSeatsOffered = supplyQuery.data?.reduce((sum, offer) => sum + offer.available_seats, 0) || 0;
+    const totalSeatsRequested = demandQuery.data?.reduce((sum, req) => sum + req.seats_needed, 0) || 0;
+    
+    const supplyDemandRatio = totalSeatsRequested > 0 ? totalSeatsOffered / totalSeatsRequested : 0;
+    
+    // Get fulfillment rate from recent bookings
+    const { data: recentBookings } = await supabase
+      .from('bookings')
+      .select('status')
+      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+    
+    const totalBookings = recentBookings?.length || 0;
+    const acceptedBookings = recentBookings?.filter(b => b.status === 'accepted').length || 0;
+    const fulfillmentRate = totalBookings > 0 ? (acceptedBookings / totalBookings) * 100 : 0;
+    
+    return {
+      active_drivers: supplyQuery.data?.length || 0,
+      active_riders: demandQuery.data?.length || 0,
+      supply_demand_ratio: supplyDemandRatio,
+      fulfillment_rate: fulfillmentRate,
+      avg_wait_time_minutes: 0, // Would need additional calculation
+      total_seats_offered: totalSeatsOffered,
+      total_seats_requested: totalSeatsRequested
     };
   }
 };

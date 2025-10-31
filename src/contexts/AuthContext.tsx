@@ -55,7 +55,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const profileData = await getUserProfile(userId);
       setProfile(profileData);
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      // Error fetching profile - silently fail
       setProfile(null);
     }
   };
@@ -64,7 +64,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     // If Supabase is not configured, just set loading to false
     if (!isSupabaseConfigured || !supabase) {
-      console.warn('Supabase not configured. Running in demo mode without backend.');
+      // Supabase not configured - running in demo mode
       setLoading(false);
       return;
     }
@@ -84,7 +84,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: AuthChangeEvent, session: Session | null) => {
-        console.log('Auth state changed:', event);
         
         setSession(session);
         setUser(session?.user ?? null);
@@ -138,13 +137,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         });
 
       if (profileError) {
-        console.error('Error creating profile:', profileError);
+        // Error creating profile
         return { error: profileError };
       }
 
       return { error: null };
     } catch (error) {
-      console.error('Signup error:', error);
+      // Signup error
       return { error };
     }
   };
@@ -165,7 +164,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       return { error: null };
     } catch (error) {
-      console.error('Sign in error:', error);
+      // Sign in error
       return { error };
     }
   };
@@ -180,7 +179,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setProfile(null);
       setSession(null);
     } catch (error) {
-      console.error('Sign out error:', error);
+      // Sign out error
     }
   };
 
@@ -202,7 +201,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       return { error: null };
     } catch (error) {
-      console.error('Update profile error:', error);
+      // Update profile error
       return { error };
     }
   };

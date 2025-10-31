@@ -17,7 +17,7 @@ export function MyTrips() {
   };
 
   const handleLocationShare = (location: { lat: number; lng: number }) => {
-    console.log('Location shared:', location);
+    // Location shared
     // In production, send to backend/other riders
   };
   return (

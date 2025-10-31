@@ -84,8 +84,7 @@ export function SafetyCenter() {
     });
     
     // Simulate sending alerts
-    console.log('Sending SOS to:', emergencyContacts);
-    console.log('Sharing location:', { lat: 25.2048, lng: 55.2708 }); // Dubai coords
+    // Send SOS to emergency contacts with current location
   };
 
   const handleShareTrip = () => {

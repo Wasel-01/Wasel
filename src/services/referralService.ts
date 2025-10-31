@@ -23,21 +23,64 @@ export interface UserReward {
   amount: number;
   description: string;
   status: 'pending' | 'approved' | 'paid' | 'expired' | 'cancelled';
+  campaign_id?: string;
   created_at: string;
 }
 
+export interface IncentiveCampaign {
+  id: string;
+  name: string;
+  description: string;
+  campaign_type: 'referral' | 'first_ride' | 'loyalty' | 'seasonal';
+  target_audience: 'drivers' | 'riders' | 'both';
+  reward_type: 'cash' | 'credit' | 'discount' | 'free_ride';
+  reward_amount: number;
+  referrer_reward?: number;
+  referred_reward?: number;
+  trigger_condition: string;
+  starts_at: string;
+  ends_at: string;
+  max_participants?: number;
+  current_participants: number;
+  is_active: boolean;
+}
+
 export const referralService = {
-  // Get user's referral code
+  // Get or create user's referral code
   async getReferralCode(userId: string): Promise<ReferralCode | null> {
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('referral_codes')
       .select('*')
       .eq('user_id', userId)
       .eq('is_active', true)
       .single();
     
+    if (error && error.code === 'PGRST116') {
+      // Create new referral code
+      const code = this.generateReferralCode();
+      const { data: newCode, error: createError } = await supabase
+        .from('referral_codes')
+        .insert({
+          user_id: userId,
+          code,
+          uses_count: 0,
+          max_uses: null,
+          is_active: true
+        })
+        .select()
+        .single();
+      
+      if (createError) throw createError;
+      return newCode;
+    }
+    
     if (error) throw error;
     return data;
+  },
+
+  // Generate unique referral code
+  generateReferralCode(): string {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
   },
 
   // Apply referral code during signup
@@ -54,6 +97,13 @@ export const referralService = {
       throw new Error('Referral code limit reached');
     }
 
+    // Get active referral campaign
+    const campaigns = await this.getActiveCampaigns();
+    const referralCampaign = campaigns?.find(c => c.campaign_type === 'referral');
+    
+    const referrerReward = referralCampaign?.referrer_reward || 50;
+    const referredReward = referralCampaign?.referred_reward || 25;
+
     // Create referral record
     const { error: refError } = await supabase
       .from('referrals')
@@ -61,8 +111,9 @@ export const referralService = {
         referrer_id: code.user_id,
         referred_id: newUserId,
         referral_code: referralCode.toUpperCase(),
-        referrer_reward_amount: 50, // AED
-        referred_reward_amount: 25  // AED
+        referrer_reward_amount: referrerReward,
+        referred_reward_amount: referredReward,
+        campaign_id: referralCampaign?.id
       });
     
     if (refError) throw refError;
@@ -72,6 +123,14 @@ export const referralService = {
       .from('referral_codes')
       .update({ uses_count: code.uses_count + 1 })
       .eq('code', referralCode.toUpperCase());
+
+    // Award welcome bonus to new user
+    await this.awardIncentive(
+      newUserId,
+      referralCampaign?.id || '',
+      referredReward,
+      'Welcome bonus for joining via referral'
+    );
   },
 
   // Get user's referrals
@@ -109,6 +168,66 @@ export const referralService = {
       .eq('is_active', true)
       .gte('ends_at', new Date().toISOString())
       .lte('starts_at', new Date().toISOString());
+    
+    if (error) throw error;
+    return data;
+  },
+
+  // Create incentive campaign
+  async createCampaign(campaign: {
+    name: string;
+    description: string;
+    target_audience: 'drivers' | 'riders' | 'both';
+    reward_type: 'cash' | 'credit' | 'discount' | 'free_ride';
+    reward_amount: number;
+    trigger_condition: string;
+    starts_at: string;
+    ends_at: string;
+    max_participants?: number;
+  }) {
+    const { data, error } = await supabase
+      .from('incentive_campaigns')
+      .insert(campaign)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  // Track campaign participation
+  async participateInCampaign(userId: string, campaignId: string) {
+    const { error } = await supabase
+      .from('campaign_participants')
+      .insert({
+        user_id: userId,
+        campaign_id: campaignId,
+        participated_at: new Date().toISOString()
+      });
+    
+    if (error) throw error;
+  },
+
+  // Award incentive
+  async awardIncentive(userId: string, campaignId: string, amount: number, description: string) {
+    const { error } = await supabase
+      .from('user_rewards')
+      .insert({
+        user_id: userId,
+        campaign_id: campaignId,
+        reward_type: 'cash',
+        amount,
+        description,
+        status: 'approved'
+      });
+    
+    if (error) throw error;
+  },
+
+  // Get referral performance
+  async getReferralPerformance(userId: string) {
+    const { data, error } = await supabase
+      .rpc('get_referral_performance', { user_id: userId });
     
     if (error) throw error;
     return data;

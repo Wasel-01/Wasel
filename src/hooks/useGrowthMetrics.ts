@@ -31,7 +31,7 @@ export function useGrowthMetrics(autoRefresh = false, refreshInterval = 60000) {
       setDailyMetrics(daily);
       setSupplyDemand(sd);
     } catch (error) {
-      console.error('Failed to load growth metrics:', error);
+      // Failed to load growth metrics
     } finally {
       setLoading(false);
     }

@@ -30,7 +30,7 @@ export default function GrowthMetricsDashboard() {
       setDailyData(daily.reverse());
       setSupplyDemand(sd);
     } catch (error) {
-      console.error('Failed to load metrics:', error);
+      // Failed to load metrics
     } finally {
       setLoading(false);
     }
