@@ -14,6 +14,7 @@ import { Settings } from './components/Settings';
 import { UserProfile } from './components/UserProfile';
 import { SafetyCenter } from './components/SafetyCenter';
 import { ReferralProgram } from './components/ReferralProgram';
+import { AdvancedTripAnalytics } from './components/AdvancedTripAnalytics';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 type Page = 
@@ -28,7 +29,8 @@ type Page =
   | 'settings'
   | 'profile'
   | 'safety'
-  | 'referrals';
+  | 'referrals'
+  | 'analytics';
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -125,6 +127,7 @@ function AppContent() {
             {currentPage === 'profile' && <UserProfile />}
             {currentPage === 'safety' && <SafetyCenter />}
             {currentPage === 'referrals' && <ReferralProgram />}
+            {currentPage === 'analytics' && <AdvancedTripAnalytics />}
           </div>
         </main>
       </div>
