@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { 
-  TrendingUp, MapPin, Users, Zap, Clock, Star, Award, 
+  MapPin, Users, Zap, Clock, Star, Award, 
   Navigation, Wallet, MessageCircle, Calendar, Target,
   Activity, BarChart3, ArrowUpRight, Sparkles
 } from 'lucide-react';
@@ -9,7 +9,7 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { LineChart, Line, AreaChart, Area, PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
+import { AreaChart, Area, PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
 
 interface SmartDashboardProps {
   onNavigate: (page: string) => void;
@@ -18,7 +18,7 @@ interface SmartDashboardProps {
 export default function SmartDashboard({ onNavigate }: SmartDashboardProps) {
   const [timeOfDay, setTimeOfDay] = useState('');
   const [personalizedGreeting, setPersonalizedGreeting] = useState('');
-  const [dashboardData, setDashboardData] = useState({
+  const [dashboardData] = useState({
     user: {
       name: 'Ahmed',
       level: 'Gold Member',
@@ -48,19 +48,24 @@ export default function SmartDashboard({ onNavigate }: SmartDashboardProps) {
   });
 
   useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) setTimeOfDay('morning');
-    else if (hour < 17) setTimeOfDay('afternoon');
-    else setTimeOfDay('evening');
+    try {
+      const hour = new Date().getHours();
+      if (hour < 12) setTimeOfDay('morning');
+      else if (hour < 17) setTimeOfDay('afternoon');
+      else setTimeOfDay('evening');
 
-    const greetings = {
-      morning: ['Ready to start your day?', 'Great morning for a journey!', 'Let\'s make today productive!'],
-      afternoon: ['How\'s your day going?', 'Perfect time for a trip!', 'Afternoon adventures await!'],
-      evening: ['Winding down?', 'Evening travels ahead?', 'Time to head home?']
-    };
-    
-    const randomGreeting = greetings[timeOfDay as keyof typeof greetings]?.[Math.floor(Math.random() * 3)] || 'Welcome back!';
-    setPersonalizedGreeting(randomGreeting);
+      const greetings = {
+        morning: ['Ready to start your day?', 'Great morning for a journey!', 'Let\'s make today productive!'],
+        afternoon: ['How\'s your day going?', 'Perfect time for a trip!', 'Afternoon adventures await!'],
+        evening: ['Winding down?', 'Evening travels ahead?', 'Time to head home?']
+      };
+      
+      const randomGreeting = greetings[timeOfDay as keyof typeof greetings]?.[Math.floor(Math.random() * 3)] || 'Welcome back!';
+      setPersonalizedGreeting(randomGreeting);
+    } catch (error) {
+      console.error('Error setting greeting:', error);
+      setPersonalizedGreeting('Welcome back!');
+    }
   }, [timeOfDay]);
 
   const levelProgress = (dashboardData.user.points / dashboardData.user.nextLevelPoints) * 100;
@@ -69,7 +74,7 @@ export default function SmartDashboard({ onNavigate }: SmartDashboardProps) {
     <div className="max-w-7xl mx-auto space-y-6 p-6">
       {/* AI-Powered Welcome Section */}
       <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 rounded-2xl p-8 text-white">
-  <div className='absolute inset-0 bg-[url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")] opacity-20'></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width=%2260%22%20height=%2260%22%20viewBox=%220%200%2060%2060%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg%20fill=%22none%22%20fill-rule=%22evenodd%22%3E%3Cg%20fill=%22%23ffffff%22%20fill-opacity=%220.1%22%3E%3Ccircle%20cx=%2230%22%20cy=%2230%22%20r=%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
         
         <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="space-y-4">

@@ -23,7 +23,11 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo);
+    console.error('Error caught by boundary:', {
+      message: error.message?.substring(0, 200),
+      stack: error.stack?.substring(0, 500),
+      componentStack: errorInfo.componentStack?.substring(0, 500)
+    });
   }
 
   render() {
@@ -44,12 +48,18 @@ export class ErrorBoundary extends Component<Props, State> {
               {this.state.error && (
                 <div className="bg-red-50 border border-red-200 rounded-md p-3">
                   <p className="text-sm text-red-800 font-mono">
-                    {this.state.error.message}
+                    {this.state.error.message?.substring(0, 200) || 'Unknown error'}
                   </p>
                 </div>
               )}
               <Button
-                onClick={() => window.location.reload()}
+                onClick={() => {
+                  try {
+                    window.location.reload();
+                  } catch (error) {
+                    console.error('Failed to reload:', error);
+                  }
+                }}
                 className="w-full"
               >
                 Refresh Page

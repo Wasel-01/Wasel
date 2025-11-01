@@ -6,13 +6,16 @@ import { Badge } from './ui/badge';
 import { Copy, Gift, Users, TrendingUp } from 'lucide-react';
 import { referralService } from '../services/referralService';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../hooks/useToast';
 
-export default function ReferralProgram() {
+export const ReferralProgram = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [referralCode, setReferralCode] = useState<string>('');
   const [referrals, setReferrals] = useState<any[]>([]);
   const [rewards, setRewards] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
+
 
   useEffect(() => {
     if (user) loadData();
@@ -32,10 +35,15 @@ export default function ReferralProgram() {
     setRewards(rwds || []);
   };
 
-  const copyCode = () => {
-    navigator.clipboard.writeText(referralCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const copyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(referralCode);
+      setCopied(true);
+      toast('Referral code copied!', { type: 'success' });
+      setTimeout(() => setCopied(false), 2000);
+0    } catch (error) {
+      toast('Failed to copy code', { type: 'error' });
+    }
   };
 
   const totalEarned = rewards

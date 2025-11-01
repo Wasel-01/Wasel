@@ -113,11 +113,11 @@ export function AuthPage({ onSuccess, onBack, initialTab = 'signup' }: AuthPageP
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>First Name</Label>
-                      <Input placeholder="Ahmed" required autoComplete="given-name" name="first_name" />
+                      <Input placeholder="First name" required autoComplete="given-name" name="first_name" />
                     </div>
                     <div className="space-y-2">
                       <Label>Last Name</Label>
-                      <Input placeholder="Hassan" required autoComplete="family-name" name="last_name" />
+                      <Input placeholder="Last name" required autoComplete="family-name" name="last_name" />
                     </div>
                   </div>
 
@@ -127,7 +127,7 @@ export function AuthPage({ onSuccess, onBack, initialTab = 'signup' }: AuthPageP
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <Input 
                         type="email" 
-                        placeholder="ahmed@example.com" 
+                        placeholder="your@email.com" 
                         className="pl-10"
                         name="email"
                         autoComplete="email"
@@ -227,7 +227,7 @@ export function AuthPage({ onSuccess, onBack, initialTab = 'signup' }: AuthPageP
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <Input 
                         type="email" 
-                        placeholder="ahmed@example.com" 
+                        placeholder="your@email.com" 
                         className="pl-10"
                         name="email"
                         autoComplete="email"

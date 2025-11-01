@@ -2,13 +2,30 @@
 
 [![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/Wasel-01/Wasel)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Production Ready](https://img.shields.io/badge/status-production%20ready-green.svg)](PRODUCTION_READY.md)
+[![Health Check](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/Wasel-01/4030b19df12e0616efa9b65503e5e1d1/raw/wasel-health.json)](https://github.com/Wasel-01/Wasel/actions?query=workflow%3A%22Health+Check%22)
 
 Wasel is a next-generation ride-sharing platform designed for the Middle East, built with modern web technologies and best practices.
+
+## 🚀 Quick Start
+
+```bash
+# 1. Setup project
+npm run setup
+
+# 2. Configure environment
+# Edit .env with your Supabase credentials
+
+# 3. Start development
+npm run dev
+
+# 4. Visit http://localhost:3000
+```
 
 ## ✨ Features
 
 - 🔐 **Secure Authentication** - Email/password authentication with Supabase
-- 🗺️ **Smart Route Matching** - Find rides based on location and preferences
+- 🗺️ **Smart Route Matching** - Find rides based on location and preferences  
 - 💬 **Real-time Messaging** - Chat with drivers and passengers
 - 💰 **Integrated Payments** - Secure payment processing
 - ⭐ **Rating System** - Rate and review your trips
@@ -16,147 +33,97 @@ Wasel is a next-generation ride-sharing platform designed for the Middle East, b
 - 📊 **Analytics Dashboard** - Track your trips and earnings
 - 🎁 **Referral Program** - Earn rewards by inviting friends
 
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Node.js 18+ and npm
-- Supabase account (optional for backend features)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Wasel-01/Wasel.git
-   cd Wasel
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edit `.env` and add your Supabase credentials:
-   ```env
-   VITE_SUPABASE_URL=your_supabase_project_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
-
-4. **Start the development server**
-   ```bash
-   npm run dev
-   ```
-
-5. **Open your browser**
-   Navigate to `http://localhost:3000`
-
 ## 🏗️ Tech Stack
 
-- **Frontend Framework**: React 18 with TypeScript
-- **Build Tool**: Vite 6
-- **Styling**: Tailwind CSS 3
-- **UI Components**: Radix UI (headless components)
-- **Icons**: Lucide React
+- **Frontend**: React 18 + TypeScript + Vite 6
+- **Styling**: Tailwind CSS 3 + Radix UI
 - **Backend**: Supabase (PostgreSQL + Auth + Realtime)
-- **State Management**: React Context API
+- **Maps**: Mapbox GL JS
+- **Charts**: Recharts
+- **Icons**: Lucide React
 
-## 📁 Project Structure
+## 📋 Requirements
 
-```
-Wasel/
-├── src/
-│   ├── components/        # React components
-│   │   ├── ui/           # Reusable UI components
-│   │   ├── Dashboard.tsx
-│   │   ├── FindRide.tsx
-│   │   └── ...
-│   ├── contexts/         # React contexts (Auth, etc.)
-│   ├── hooks/            # Custom React hooks
-│   ├── utils/            # Utility functions
-│   ├── lib/              # Library configurations
-│   ├── App.tsx           # Main app component
-│   └── main.tsx          # Entry point
-├── public/               # Static assets
-├── .env.example          # Environment variables template
-└── package.json          # Dependencies
-```
+- Node.js 18+
+- npm or yarn
+- Supabase account (optional for demo)
 
-## 🔧 Available Scripts
+## 🛠️ Available Scripts
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
+| Script | Description |
+|--------|-------------|
+| `npm run setup` | Initial project setup |
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
+| `npm run health` | Run health checks |
+| `npm run typecheck` | Check TypeScript types |
 
-## 🎨 Customization
+## 🔧 Configuration
 
-### Theme Colors
+### Environment Variables
 
-Edit `tailwind.config.cjs` to customize the color palette:
-
-```js
-theme: {
-  extend: {
-    colors: {
-      primary: {
-        DEFAULT: '#14b8a6',
-        // ... other shades
-      }
-    }
-  }
-}
+```env
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_SUPABASE_PROJECT_ID=your_project_id
+VITE_MAPBOX_ACCESS_TOKEN=your_mapbox_token
 ```
 
-### Fonts
+### Supabase Setup
 
-The app uses Inter and Poppins fonts from Google Fonts. To change fonts, edit `src/index.css`.
+1. Create project at [supabase.com](https://supabase.com)
+2. Run SQL migrations from `src/supabase/`
+3. Add credentials to `.env`
+4. Restart development server
 
-## 🔐 Backend Setup (Optional)
+## 🚀 Deployment
 
-Wasel works in demo mode without a backend, but for full functionality:
+Ready for deployment to:
 
-1. Create a Supabase project at [supabase.com](https://supabase.com)
-2. Run the SQL migrations from `src/supabase/migrations/`
-3. Add your Supabase credentials to `.env`
-4. Restart the development server
+- **Vercel** - `vercel --prod`
+- **Netlify** - Deploy `dist` folder
+- **AWS Amplify** - Connect repository
+- **Static Hosting** - Upload `dist` folder
 
-## 📱 Features Overview
+```bash
+npm run build
+# Deploy the dist/ folder
+```
 
-### For Passengers
-- Search for rides by location and date
-- Book seats instantly
-- Real-time trip tracking
-- In-app messaging with drivers
-- Rate and review trips
+## 📚 Documentation
 
-### For Drivers
-- Offer rides on your route
-- Manage bookings
-- Track earnings
-- Build your reputation
-- Flexible scheduling
+- [Quick Start Guide](QUICK_START.md)
+- [Feature Specification](src/FEATURE_SPEC.md)
+- [Developer Guide](src/DEVELOPER_GUIDE.md)
+- [Backend Setup](src/BACKEND_SETUP_GUIDE.md)
+- [Production Ready](PRODUCTION_READY.md)
+
+## 🔒 Security
+
+- ✅ No hardcoded credentials
+- ✅ Input sanitization
+- ✅ XSS prevention
+- ✅ Log injection protection
+- ✅ Environment variable security
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License.
-
-## 🔗 Links
-
-- [GitHub Repository](https://github.com/Wasel-01/Wasel)
-- [Documentation](./src/DEVELOPER_GUIDE.md)
-- [Backend Setup Guide](./src/BACKEND_SETUP_GUIDE.md)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 💬 Support
 
-For support, please open an issue on GitHub or contact the development team.
+- 📧 Email: [support@wasel.app](mailto:support@wasel.app)
+- 💬 Discord: [Join our community](https://discord.gg/wasel)
+- 🐛 Issues: [GitHub Issues](https://github.com/Wasel-01/Wasel/issues)
 
 ---
 

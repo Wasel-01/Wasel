@@ -3,16 +3,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import SmartDashboard from './SmartDashboard';
 import PersonalizedInsights from './PersonalizedInsights';
 import RealTimeWidgets from './RealTimeWidgets';
+import type { DashboardProps, UserStats } from '../types/components';
 
-interface DashboardProps {
-  onNavigate: (page: string) => void;
-}
+
 
 export function Dashboard({ onNavigate }: DashboardProps) {
   const [activeTab, setActiveTab] = useState('overview');
   
   // Mock user stats for personalized insights
-  const userStats = {
+  const userStats: UserStats = {
     totalTrips: 47,
     totalEarnings: 2450,
     averageRating: 4.9,

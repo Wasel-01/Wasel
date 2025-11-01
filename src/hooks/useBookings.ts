@@ -1,167 +1,44 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../utils/supabase/client';
-import { useAuth } from '../contexts/AuthContext';
-import type { Database } from '../utils/supabase/database.types';
+import { bookingsAPI } from '../services/api';
 
-type Booking = Database['public']['Tables']['bookings']['Row'];
-type BookingInsert = Database['public']['Tables']['bookings']['Insert'];
-type BookingUpdate = Database['public']['Tables']['bookings']['Update'];
-
-export function useBookings(filters?: {
-  status?: string[];
-  tripId?: string;
-  passengerId?: string;
-}) {
-  const { user } = useAuth();
+export function useBookings() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) {
-      fetchBookings();
-    }
-  }, [user, filters]);
+    loadBookings();
+  }, []);
 
-  const fetchBookings = async () => {
-    if (!user) return;
-
+  const loadBookings = async () => {
     try {
       setLoading(true);
-      let query = supabase
-        .from('bookings')
-        .select(`
-          *,
-          trip:trips(*,
-            driver:profiles!driver_id(*)
-          ),
-          passenger:profiles!passenger_id(*)
-        `)
-        .order('created_at', { ascending: false });
-
-      // Apply filters
-      if (filters?.status && filters.status.length > 0) {
-        query = query.in('status', filters.status);
-      }
-
-      if (filters?.tripId) {
-        query = query.eq('trip_id', filters.tripId);
-      }
-
-      if (filters?.passengerId) {
-        query = query.eq('passenger_id', filters.passengerId);
-      }
-
-      const { data, error: fetchError } = await query;
-
-      if (fetchError) throw fetchError;
-
+      const data = await bookingsAPI.getUserBookings();
       setBookings(data || []);
       setError(null);
-    } catch (err: any) {
-      // Error fetching bookings
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load bookings');
     } finally {
       setLoading(false);
     }
   };
 
-  const createBooking = async (bookingData: BookingInsert) => {
+  const createBooking = async (tripId: string, seatsBooked: number) => {
     try {
-      const { data, error } = await supabase
-        .from('bookings')
-        .insert(bookingData)
-        .select(`
-          *,
-          trip:trips(*)
-        `)
-        .single();
-
-      if (error) throw error;
-
-      // Create notification for driver
-      if (data.trip) {
-        await supabase.from('notifications').insert({
-          user_id: (data.trip as any).driver_id,
-          type: 'trip_request',
-          title: 'New Trip Request',
-          message: `Someone wants to join your trip`,
-          priority: 'high',
-          booking_id: data.id,
-          trip_id: data.trip_id,
-        });
-      }
-
-      await fetchBookings();
-
-      return { data, error: null };
-    } catch (err: any) {
-      // Error creating booking
-      return { data: null, error: err.message };
+      const booking = await bookingsAPI.createBooking(tripId, seatsBooked);
+      setBookings(prev => [booking, ...prev]);
+      return booking;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create booking');
+      throw err;
     }
-  };
-
-  const updateBooking = async (bookingId: string, updates: BookingUpdate) => {
-    try {
-      const { data, error } = await supabase
-        .from('bookings')
-        .update(updates)
-        .eq('id', bookingId)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      await fetchBookings();
-
-      return { data, error: null };
-    } catch (err: any) {
-      // Error updating booking
-      return { data: null, error: err.message };
-    }
-  };
-
-  const acceptBooking = async (bookingId: string) => {
-    return updateBooking(bookingId, {
-      status: 'accepted',
-      accepted_at: new Date().toISOString(),
-    });
-  };
-
-  const rejectBooking = async (bookingId: string, reason?: string) => {
-    return updateBooking(bookingId, {
-      status: 'rejected',
-      rejected_at: new Date().toISOString(),
-      cancellation_reason: reason,
-    });
-  };
-
-  const cancelBooking = async (bookingId: string, reason?: string) => {
-    if (!user) return { error: 'Not authenticated' };
-
-    return updateBooking(bookingId, {
-      status: 'cancelled',
-      cancelled_at: new Date().toISOString(),
-      cancelled_by: user.id,
-      cancellation_reason: reason,
-    });
   };
 
   return {
     bookings,
     loading,
     error,
-    refresh: fetchBookings,
-    createBooking,
-    updateBooking,
-    acceptBooking,
-    rejectBooking,
-    cancelBooking,
+    refresh: loadBookings,
+    createBooking
   };
-}
-
-// Hook for my trips (as passenger)
-export function useMyBookings() {
-  const { user } = useAuth();
-  return useBookings({ passengerId: user?.id });
 }

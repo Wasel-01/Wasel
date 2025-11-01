@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabase/client';
 import { useAuth } from '../contexts/AuthContext';
-import type { Database } from '../utils/supabase/database.types';
+import type { Database } from '../types/database';
 
 type Notification = Database['public']['Tables']['notifications']['Row'];
 
@@ -60,11 +60,21 @@ export function useNotifications() {
 
           // Show browser notification
           if ('Notification' in window && Notification.permission === 'granted') {
-            const notif = payload.new as Notification;
-            new Notification(notif.title, {
-              body: notif.message,
-              icon: '/wassel-logo.png',
-            });
+            try {
+              const notif = payload.new as Notification;
+              const sanitizedTitle = String(notif.title || 'New notification')
+                .replace(/[<>"'&\r\n\t]/g, '')
+                .substring(0, 100);
+              const sanitizedMessage = String(notif.message || '')
+                .replace(/[<>"'&\r\n\t]/g, '')
+                .substring(0, 200);
+              new window.Notification(sanitizedTitle, {
+                body: sanitizedMessage,
+                icon: '/wassel-logo.png',
+              });
+            } catch (error) {
+              console.error('Failed to show notification:', error);
+            }
           }
         }
       )

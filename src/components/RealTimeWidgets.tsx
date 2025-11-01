@@ -3,10 +3,9 @@ import { Activity, Signal, Clock, Users, TrendingUp, AlertTriangle, CheckCircle 
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
+import type { RealTimeWidgetsProps } from '../types/components';
 
-interface RealTimeWidgetsProps {
-  userId: string;
-}
+
 
 export default function RealTimeWidgets({ userId }: RealTimeWidgetsProps) {
   const [liveData, setLiveData] = useState({

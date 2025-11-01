@@ -4,29 +4,38 @@
 
 const isDevelopment = import.meta.env.DEV;
 
+const sanitizeMessage = (message: string): string => {
+  try {
+    return String(message || '')
+      .replace(/[\r\n\t<>"'&]/g, ' ')
+      .substring(0, 1000);
+  } catch {
+    return 'Invalid message';
+  }
+};
+
 export const logger = {
   error: (message: string, error?: unknown) => {
     if (isDevelopment) {
-      console.error(`[ERROR] ${message}`, error);
+      console.error(`[ERROR] ${sanitizeMessage(message)}`, error);
     }
-    // In production, you could send to error tracking service
   },
 
   warn: (message: string, data?: unknown) => {
     if (isDevelopment) {
-      console.warn(`[WARN] ${message}`, data);
+      console.warn(`[WARN] ${sanitizeMessage(message)}`, data);
     }
   },
 
   info: (message: string, data?: unknown) => {
     if (isDevelopment) {
-      console.log(`[INFO] ${message}`, data);
+      console.log(`[INFO] ${sanitizeMessage(message)}`, data);
     }
   },
 
   debug: (message: string, data?: unknown) => {
     if (isDevelopment) {
-      console.log(`[DEBUG] ${message}`, data);
+      console.log(`[DEBUG] ${sanitizeMessage(message)}`, data);
     }
   },
 };

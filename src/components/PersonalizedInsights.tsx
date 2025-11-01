@@ -4,22 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
+import type { PersonalizedInsightsProps } from '../types/components';
 
-interface PersonalizedInsightsProps {
-  userId: string;
-  userStats: {
-    totalTrips: number;
-    totalEarnings: number;
-    averageRating: number;
-    preferredRoutes: string[];
-    travelPatterns: any[];
-  };
-}
+
 
 export default function PersonalizedInsights({ userId, userStats }: PersonalizedInsightsProps) {
-  const [insights, setInsights] = useState<any[]>([]);
-  const [goals, setGoals] = useState<any[]>([]);
-  const [achievements, setAchievements] = useState<any[]>([]);
+  const [insights, setInsights] = useState<unknown[]>([]);
+  const [goals, setGoals] = useState<unknown[]>([]);
+  const [achievements, setAchievements] = useState<unknown[]>([]);
 
   useEffect(() => {
     generatePersonalizedInsights();

@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from './database.types';
+import type { Database } from '../../types/database';
 
 // Get environment variables - check both import.meta.env and process.env for compatibility
 const getEnvVar = (key: string): string => {
@@ -80,7 +80,14 @@ export async function getUserProfile(userId?: string) {
     .single();
     
   if (error) {
-    console.error('Error fetching profile:', error);
+    try {
+      console.error('Error fetching profile:', { 
+        code: error.code, 
+        message: String(error.message || 'Unknown error').substring(0, 200) 
+      });
+    } catch {
+      console.error('Error fetching profile: Unknown error');
+    }
     return null;
   }
   

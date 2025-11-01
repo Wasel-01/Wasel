@@ -1,37 +1,23 @@
 import { useState, useEffect } from 'react';
-import { growthMetricsService } from '../services/growthMetricsService';
+import { growthMetricsService, type GrowthMetrics } from '../services/growthMetricsService';
 
-export function useGrowthMetrics(autoRefresh = false, refreshInterval = 60000) {
-  const [metrics, setMetrics] = useState<any>(null);
-  const [dailyMetrics, setDailyMetrics] = useState<any[]>([]);
-  const [supplyDemand, setSupplyDemand] = useState<any>(null);
+export function useGrowthMetrics() {
+  const [metrics, setMetrics] = useState<GrowthMetrics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadMetrics();
-    
-    if (autoRefresh) {
-      const interval = setInterval(loadMetrics, refreshInterval);
-      return () => clearInterval(interval);
-    }
-  }, [autoRefresh, refreshInterval]);
+  }, []);
 
   const loadMetrics = async () => {
     try {
-      const endDate = new Date().toISOString().split('T')[0];
-      const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-      
-      const [summary, daily, sd] = await Promise.all([
-        growthMetricsService.getMetricsSummary(),
-        growthMetricsService.getDailyMetrics(startDate, endDate),
-        growthMetricsService.getSupplyDemandBalance()
-      ]);
-      
-      setMetrics(summary);
-      setDailyMetrics(daily);
-      setSupplyDemand(sd);
-    } catch (error) {
-      // Failed to load growth metrics
+      setLoading(true);
+      const data = await growthMetricsService.getMetrics();
+      setMetrics(data);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load metrics');
     } finally {
       setLoading(false);
     }
@@ -39,9 +25,8 @@ export function useGrowthMetrics(autoRefresh = false, refreshInterval = 60000) {
 
   return {
     metrics,
-    dailyMetrics,
-    supplyDemand,
     loading,
+    error,
     refresh: loadMetrics
   };
 }

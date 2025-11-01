@@ -78,10 +78,22 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null;
   }
 
+  const sanitizeCSS = (css: string) => {
+    try {
+      return String(css || '')
+        .replace(/[<>"'&]/g, '')
+        .replace(/javascript:/gi, '')
+        .replace(/expression\(/gi, '')
+        .replace(/url\(/gi, '');
+    } catch {
+      return '';
+    }
+  };
+
   return (
     <style
       dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
+        __html: sanitizeCSS(Object.entries(THEMES)
           .map(
             ([theme, prefix]) => `
 ${prefix} [data-chart=${id}] {
@@ -96,7 +108,7 @@ ${colorConfig
 }
 `,
           )
-          .join("\n"),
+          .join("\n")),
       }}
     />
   );

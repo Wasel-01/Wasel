@@ -193,7 +193,7 @@ export default function AdvancedMapNavigation({
     navigationSteps.forEach((step, index) => {
       const el = document.createElement('div');
       el.className = 'navigation-marker';
-      el.innerHTML = getManeuverIcon(step.maneuver);
+      el.textContent = getManeuverIcon(step.maneuver).replace(/<[^>]*>/g, '');
       
       new (map as any).Marker(el)
         .setLngLat(step.coordinates)

@@ -2,18 +2,53 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
 
-export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
+export default defineConfig(({ command, mode }) => {
+  const isDev = command === 'serve';
+  const isProd = mode === 'production';
+  
+  return {
+    plugins: [react()],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+        '@/components': path.resolve(__dirname, './src/components'),
+        '@/lib': path.resolve(__dirname, './src/lib'),
+        '@/utils': path.resolve(__dirname, './src/utils'),
+        '@/types': path.resolve(__dirname, './src/types'),
+      },
     },
-  },
-  server: {
-    port: 3000,
-  },
-  build: {
-    outDir: 'dist',
-    sourcemap: false,
-  },
+    server: {
+      port: 3000,
+      host: true,
+      open: true,
+    },
+    build: {
+      outDir: 'dist',
+      assetsDir: 'assets',
+      sourcemap: isDev,
+      minify: isProd ? 'terser' : false,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom'],
+            ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+            charts: ['recharts'],
+            maps: ['mapbox-gl'],
+          },
+        },
+      },
+      terserOptions: {
+        compress: {
+          drop_console: isProd,
+          drop_debugger: isProd,
+        },
+      },
+    },
+    define: {
+      __DEV__: isDev,
+    },
+    optimizeDeps: {
+      include: ['react', 'react-dom', '@supabase/supabase-js'],
+    },
+  };
 })
