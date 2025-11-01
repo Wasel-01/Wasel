@@ -7,7 +7,7 @@ import { Copy, Gift, Users, TrendingUp } from 'lucide-react';
 import { referralService } from '../services/referralService';
 import { useAuth } from '../contexts/AuthContext';
 
-export default function ReferralProgram() {
+export function ReferralProgram() {
   const { user } = useAuth();
   const [referralCode, setReferralCode] = useState<string>('');
   const [referrals, setReferrals] = useState<any[]>([]);
@@ -176,3 +176,5 @@ export default function ReferralProgram() {
     </div>
   );
 }
+
+export default ReferralProgram;
