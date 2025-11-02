@@ -1,6 +1,11 @@
 const sanitizeLogInput = (input: any): string => {
   try {
-    return String(input || '').replace(/[\r\n\t<>"'&]/g, '').substring(0, 200);
+    return String(input || '')
+      .replace(/[\r\n\t<>"'&\x00-\x1f\x7f-\x9f]/g, '')
+      .replace(/javascript:/gi, '')
+      .replace(/data:/gi, '')
+      .replace(/vbscript:/gi, '')
+      .substring(0, 200);
   } catch {
     return 'invalid';
   }

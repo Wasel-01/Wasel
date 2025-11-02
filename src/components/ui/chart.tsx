@@ -47,7 +47,8 @@ function ChartContainer({
   >["children"];
 }) {
   const uniqueId = React.useId();
-  const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`;
+  const sanitizedId = String(id || uniqueId).replace(/[^a-zA-Z0-9-_]/g, '');
+  const chartId = `chart-${sanitizedId}`;
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -78,45 +79,62 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null;
   }
 
-  const sanitizeCSS = (css: string) => {
-    try {
-      return String(css || '')
-        .replace(/[<>"'&\r\n\t]/g, '')
-        .replace(/javascript:/gi, '')
-        .replace(/expression\(/gi, '')
-        .replace(/url\(/gi, '')
-        .replace(/import/gi, '')
-        .replace(/@/g, '')
-        .replace(/\/\*/g, '')
-        .replace(/\*\//g, '')
-        .substring(0, 10000);
-    } catch {
-      return '';
-    }
-  };
+  // Safely generate CSS custom properties using React's style prop
+  const cssVariables = React.useMemo(() => {
+    const variables: Record<string, string> = {};
+    
+    colorConfig.forEach(([key, itemConfig]) => {
+      // Sanitize key to only allow safe characters
+      const sanitizedKey = String(key || '').replace(/[^a-zA-Z0-9-_]/g, '');
+      if (!sanitizedKey) return;
+      
+      // Handle theme-based colors
+      if (itemConfig.theme) {
+        Object.entries(THEMES).forEach(([theme]) => {
+          const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme];
+          if (color && typeof color === 'string') {
+            // Validate color format (hex, rgb, hsl, named colors)
+            const isValidColor = /^(#[0-9a-f]{3,8}|rgb\(|rgba\(|hsl\(|hsla\(|[a-z]+)$/i.test(color);
+            if (isValidColor) {
+              variables[`--color-${sanitizedKey}`] = color;
+            }
+          }
+        });
+      }
+      
+      // Handle direct colors
+      if (itemConfig.color && typeof itemConfig.color === 'string') {
+        const isValidColor = /^(#[0-9a-f]{3,8}|rgb\(|rgba\(|hsl\(|hsla\(|[a-z]+)$/i.test(itemConfig.color);
+        if (isValidColor) {
+          variables[`--color-${sanitizedKey}`] = itemConfig.color;
+        }
+      }
+    });
+    
+    return variables;
+  }, [colorConfig]);
 
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: sanitizeCSS(Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
-${colorConfig
-  .map(([key, itemConfig]) => {
-    const color =
-      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
-      itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
-  })
-  .join("\n")}
-}
-`,
-          )
-          .join("\n")),
-      }}
-    />
-  );
+  // Apply CSS variables directly to the chart container via React's style prop
+  React.useEffect(() => {
+    const sanitizedId = String(id || '').replace(/[^a-zA-Z0-9-_]/g, '');
+    const chartElement = document.querySelector(`[data-chart="${sanitizedId}"]`) as HTMLElement;
+    
+    if (chartElement) {
+      Object.entries(cssVariables).forEach(([property, value]) => {
+        chartElement.style.setProperty(property, value);
+      });
+    }
+    
+    return () => {
+      if (chartElement) {
+        Object.keys(cssVariables).forEach((property) => {
+          chartElement.style.removeProperty(property);
+        });
+      }
+    };
+  }, [cssVariables, id]);
+
+  return null;
 };
 
 const ChartTooltip = RechartsPrimitive.Tooltip;

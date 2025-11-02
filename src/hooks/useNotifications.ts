@@ -75,6 +75,8 @@ export function useNotifications() {
               new window.Notification(sanitizedTitle, {
                 body: sanitizedMessage,
                 icon: '/wassel-logo.png',
+                tag: 'wasel-notification',
+                requireInteraction: false
               });
             } catch (error) {
               console.error('Failed to show notification:', error);
