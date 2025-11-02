@@ -1,6 +1,3 @@
-// TypeScript types generated from Supabase schema
-// This file is auto-generated - do not edit manually
-
 export type Json =
   | string
   | number
@@ -9,353 +6,308 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
   public: {
     Tables: {
+      conversation_participants: {
+        Row: {
+          conversation_id: string | null
+          id: string
+          joined_at: string | null
+          role: string | null
+          user_id: string | null
+        }
+        Insert: {
+          conversation_id?: string | null
+          id?: string
+          joined_at?: string | null
+          role?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          conversation_id?: string | null
+          id?: string
+          joined_at?: string | null
+          role?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          metadata: Json | null
+          title: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          metadata?: Json | null
+          title?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          metadata?: Json | null
+          title?: string | null
+        }
+        Relationships: []
+      }
+      health_check: {
+        Row: {
+          created_at: string | null
+          id: number
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          status?: string | null
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          content_json: Json | null
+          conversation_id: string | null
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          sender_id: string | null
+        }
+        Insert: {
+          content: string
+          content_json?: Json | null
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          sender_id?: string | null
+        }
+        Update: {
+          content?: string
+          content_json?: Json | null
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          sender_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
-          id: string
-          email: string
-          phone: string | null
-          full_name: string
-          full_name_ar: string | null
           avatar_url: string | null
-          bio: string | null
-          bio_ar: string | null
-          date_of_birth: string | null
-          gender: string | null
-          city: string | null
-          country: string
-          phone_verified: boolean
-          email_verified: boolean
-          is_verified: boolean
-          verification_level: number
-          total_trips: number
-          trips_as_driver: number
-          trips_as_passenger: number
-          rating_as_driver: number
-          rating_as_passenger: number
-          total_ratings_received: number
-          smoking_allowed: boolean
-          pets_allowed: boolean
-          music_allowed: boolean
-          conversation_level: string | null
-          preferred_temperature: string | null
-          language: string
-          currency: string
-          notification_enabled: boolean
-          location_sharing_enabled: boolean
-          wallet_balance: number
-          total_earned: number
-          total_spent: number
-          created_at: string
-          updated_at: string
-          last_active_at: string
-          deleted_at: string | null
-        }
-        Insert: {
-          id: string
+          created_at: string | null
           email: string
-          phone?: string | null
+          email_verified: boolean | null
           full_name: string
-          full_name_ar?: string | null
-          avatar_url?: string | null
-          bio?: string | null
-          bio_ar?: string | null
-          date_of_birth?: string | null
-          gender?: string | null
-          city?: string | null
-          country?: string
-          phone_verified?: boolean
-          email_verified?: boolean
-          is_verified?: boolean
-          verification_level?: number
-          total_trips?: number
-          trips_as_driver?: number
-          trips_as_passenger?: number
-          rating_as_driver?: number
-          rating_as_passenger?: number
-          total_ratings_received?: number
-          smoking_allowed?: boolean
-          pets_allowed?: boolean
-          music_allowed?: boolean
-          conversation_level?: string | null
-          preferred_temperature?: string | null
-          language?: string
-          currency?: string
-          notification_enabled?: boolean
-          location_sharing_enabled?: boolean
-          wallet_balance?: number
-          total_earned?: number
-          total_spent?: number
-          created_at?: string
-          updated_at?: string
-          last_active_at?: string
-          deleted_at?: string | null
+          id: string
+          phone: string | null
+          phone_verified: boolean | null
+          updated_at: string | null
         }
-        Update: {
-          id?: string
-          email?: string
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email: string
+          email_verified?: boolean | null
+          full_name: string
+          id: string
           phone?: string | null
-          full_name?: string
-          full_name_ar?: string | null
+          phone_verified?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
           avatar_url?: string | null
-          bio?: string | null
-          bio_ar?: string | null
-          date_of_birth?: string | null
-          gender?: string | null
-          city?: string | null
-          country?: string
-          phone_verified?: boolean
-          email_verified?: boolean
-          is_verified?: boolean
-          verification_level?: number
-          total_trips?: number
-          trips_as_driver?: number
-          trips_as_passenger?: number
-          rating_as_driver?: number
-          rating_as_passenger?: number
-          total_ratings_received?: number
-          smoking_allowed?: boolean
-          pets_allowed?: boolean
-          music_allowed?: boolean
-          conversation_level?: string | null
-          preferred_temperature?: string | null
-          language?: string
-          currency?: string
-          notification_enabled?: boolean
-          location_sharing_enabled?: boolean
-          wallet_balance?: number
-          total_earned?: number
-          total_spent?: number
-          created_at?: string
-          updated_at?: string
-          last_active_at?: string
-          deleted_at?: string | null
+          created_at?: string | null
+          email?: string
+          email_verified?: boolean | null
+          full_name?: string
+          id?: string
+          phone?: string | null
+          phone_verified?: boolean | null
+          updated_at?: string | null
         }
+        Relationships: []
       }
-      trips: {
-        Row: {
-          id: string
-          driver_id: string
-          vehicle_id: string | null
-          trip_type: 'wasel' | 'raje3'
-          status: 'draft' | 'published' | 'active' | 'completed' | 'cancelled'
-          from_location: string
-          from_lat: number
-          from_lng: number
-          to_location: string
-          to_lat: number
-          to_lng: number
-          departure_date: string
-          departure_time: string
-          estimated_arrival_time: string | null
-          actual_departure_time: string | null
-          actual_arrival_time: string | null
-          available_seats: number
-          seats_booked: number
-          price_per_seat: number
-          notes: string | null
-          luggage_allowed: boolean
-          instant_booking: boolean
-          recurring_trip_id: string | null
-          created_at: string
-          updated_at: string
-          published_at: string | null
-          cancelled_at: string | null
-          cancellation_reason: string | null
-        }
-        Insert: {
-          id?: string
-          driver_id: string
-          vehicle_id?: string | null
-          trip_type: 'wasel' | 'raje3'
-          status?: 'draft' | 'published' | 'active' | 'completed' | 'cancelled'
-          from_location: string
-          from_lat: number
-          from_lng: number
-          to_location: string
-          to_lat: number
-          to_lng: number
-          departure_date: string
-          departure_time: string
-          estimated_arrival_time?: string | null
-          actual_departure_time?: string | null
-          actual_arrival_time?: string | null
-          available_seats: number
-          seats_booked?: number
-          price_per_seat: number
-          notes?: string | null
-          luggage_allowed?: boolean
-          instant_booking?: boolean
-          recurring_trip_id?: string | null
-          created_at?: string
-          updated_at?: string
-          published_at?: string | null
-          cancelled_at?: string | null
-          cancellation_reason?: string | null
-        }
-        Update: {
-          id?: string
-          driver_id?: string
-          vehicle_id?: string | null
-          trip_type?: 'wasel' | 'raje3'
-          status?: 'draft' | 'published' | 'active' | 'completed' | 'cancelled'
-          from_location?: string
-          from_lat?: number
-          from_lng?: number
-          to_location?: string
-          to_lat?: number
-          to_lng?: number
-          departure_date?: string
-          departure_time?: string
-          estimated_arrival_time?: string | null
-          actual_departure_time?: string | null
-          actual_arrival_time?: string | null
-          available_seats?: number
-          seats_booked?: number
-          price_per_seat?: number
-          notes?: string | null
-          luggage_allowed?: boolean
-          instant_booking?: boolean
-          recurring_trip_id?: string | null
-          created_at?: string
-          updated_at?: string
-          published_at?: string | null
-          cancelled_at?: string | null
-          cancellation_reason?: string | null
-        }
-      }
-      bookings: {
-        Row: {
-          id: string
-          trip_id: string
-          passenger_id: string
-          status: 'pending' | 'accepted' | 'rejected' | 'cancelled' | 'completed'
-          seats_requested: number
-          pickup_location: string | null
-          pickup_lat: number | null
-          pickup_lng: number | null
-          dropoff_location: string | null
-          dropoff_lat: number | null
-          dropoff_lng: number | null
-          total_price: number
-          payment_status: 'pending' | 'completed' | 'failed' | 'refunded'
-          payment_method: 'cash' | 'card' | 'wallet' | 'bank_transfer' | null
-          notes: string | null
-          has_luggage: boolean
-          created_at: string
-          accepted_at: string | null
-          rejected_at: string | null
-          cancelled_at: string | null
-          completed_at: string | null
-          cancelled_by: string | null
-          cancellation_reason: string | null
-        }
-        Insert: {
-          id?: string
-          trip_id: string
-          passenger_id: string
-          status?: 'pending' | 'accepted' | 'rejected' | 'cancelled' | 'completed'
-          seats_requested?: number
-          pickup_location?: string | null
-          pickup_lat?: number | null
-          pickup_lng?: number | null
-          dropoff_location?: string | null
-          dropoff_lat?: number | null
-          dropoff_lng?: number | null
-          total_price: number
-          payment_status?: 'pending' | 'completed' | 'failed' | 'refunded'
-          payment_method?: 'cash' | 'card' | 'wallet' | 'bank_transfer' | null
-          notes?: string | null
-          has_luggage?: boolean
-          created_at?: string
-          accepted_at?: string | null
-          rejected_at?: string | null
-          cancelled_at?: string | null
-          completed_at?: string | null
-          cancelled_by?: string | null
-          cancellation_reason?: string | null
-        }
-        Update: {
-          id?: string
-          trip_id?: string
-          passenger_id?: string
-          status?: 'pending' | 'accepted' | 'rejected' | 'cancelled' | 'completed'
-          seats_requested?: number
-          pickup_location?: string | null
-          pickup_lat?: number | null
-          pickup_lng?: number | null
-          dropoff_location?: string | null
-          dropoff_lat?: number | null
-          dropoff_lng?: number | null
-          total_price?: number
-          payment_status?: 'pending' | 'completed' | 'failed' | 'refunded'
-          payment_method?: 'cash' | 'card' | 'wallet' | 'bank_transfer' | null
-          notes?: string | null
-          has_luggage?: boolean
-          created_at?: string
-          accepted_at?: string | null
-          rejected_at?: string | null
-          cancelled_at?: string | null
-          completed_at?: string | null
-          cancelled_by?: string | null
-          cancellation_reason?: string | null
-        }
-      }
-      // Add other table types as needed
-      [key: string]: any
     }
     Views: {
-      active_trips_view: {
-        Row: {
-          id: string
-          driver_name: string
-          driver_avatar: string | null
-          rating_as_driver: number
-          vehicle_make: string | null
-          vehicle_model: string | null
-          remaining_seats: number
-          // ... other trip fields
-        }
-      }
+      [_ in never]: never
     }
     Functions: {
-      search_nearby_trips: {
-        Args: {
-          from_lat: number
-          from_lng: number
-          to_lat: number
-          to_lng: number
-          max_distance_km?: number
-          departure_date?: string
-        }
+      check_schema_health: { Args: never; Returns: boolean }
+      get_conversation_messages_for_summary: {
+        Args: { c_id: string; limit_arg?: number }
         Returns: {
-          trip_id: string
-          driver_name: string
-          distance_from_km: number
-          distance_to_km: number
-        }[]
-      }
-      get_user_stats: {
-        Args: {
-          user_uuid: string
-        }
-        Returns: {
-          total_trips_count: number
-          as_driver: number
-          as_passenger: number
-          total_distance_km: number
-          carbon_saved_kg: number
+          content: string
+          content_json: Json
+          conversation_id: string
+          created_at: string
+          id: string
+          sender_id: string
         }[]
       }
     }
     Enums: {
-      trip_type: 'wasel' | 'raje3'
-      trip_status: 'draft' | 'published' | 'active' | 'completed' | 'cancelled'
-      booking_status: 'pending' | 'accepted' | 'rejected' | 'cancelled' | 'completed'
-      payment_status: 'pending' | 'completed' | 'failed' | 'refunded'
-      // ... other enums
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const

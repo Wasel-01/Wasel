@@ -120,16 +120,31 @@ export const tripsAPI = {
 // ============ BOOKINGS API ============
 
 export const bookingsAPI = {
-  async createBooking(tripId: string, seatsBooked: number) {
+  async createBooking(tripId: string, seatsRequested: number) {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Not authenticated');
+
+    // Fetch trip to get price_per_seat
+    const { data: trip, error: tripError } = await supabase
+      .from('trips')
+      .select('price_per_seat')
+      .eq('id', tripId)
+      .single();
+
+    if (tripError) throw tripError;
+    if (!trip) throw new Error('Trip not found');
+
+    const totalPrice = trip.price_per_seat * seatsRequested;
 
     const { data, error } = await supabase
       .from('bookings')
       .insert({
         trip_id: tripId,
         passenger_id: user.user.id,
-        seats_booked: seatsBooked
+        seats_requested: seatsRequested,
+        total_price: totalPrice,
+        status: 'pending',
+        payment_status: 'pending'
       })
       .select()
       .single();
@@ -204,13 +219,18 @@ export const walletAPI = {
     if (!user.user) throw new Error('Not authenticated');
 
     const { data, error } = await supabase
-      .from('wallets')
-      .select('*')
-      .eq('user_id', user.user.id)
+      .from('profiles')
+      .select('id, wallet_balance, total_earned, total_spent')
+      .eq('id', user.user.id)
       .single();
 
     if (error) throw error;
-    return data;
+    return {
+      user_id: data.id,
+      balance: data.wallet_balance || 0,
+      total_earned: data.total_earned || 0,
+      total_spent: data.total_spent || 0
+    };
   },
 
   async addFunds(amount: number) {
@@ -218,25 +238,30 @@ export const walletAPI = {
     if (!user.user) throw new Error('Not authenticated');
 
     // First get current balance
-    const { data: wallet, error: fetchError } = await supabase
-      .from('wallets')
-      .select('balance')
-      .eq('user_id', user.user.id)
+    const { data: profile, error: fetchError } = await supabase
+      .from('profiles')
+      .select('wallet_balance')
+      .eq('id', user.user.id)
       .single();
 
     if (fetchError) throw fetchError;
-    if (!wallet) throw new Error('Wallet not found');
+    if (!profile) throw new Error('Profile not found');
 
     // Update balance
-    const newBalance = (wallet.balance || 0) + amount;
+    const newBalance = (profile.wallet_balance || 0) + amount;
     const { data, error } = await supabase
-      .from('wallets')
-      .update({ balance: newBalance })
-      .eq('user_id', user.user.id)
-      .select()
+      .from('profiles')
+      .update({ wallet_balance: newBalance })
+      .eq('id', user.user.id)
+      .select('id, wallet_balance, total_earned, total_spent')
       .single();
 
     if (error) throw error;
-    return data;
+    return {
+      user_id: data.id,
+      balance: data.wallet_balance || 0,
+      total_earned: data.total_earned || 0,
+      total_spent: data.total_spent || 0
+    };
   }
 };
