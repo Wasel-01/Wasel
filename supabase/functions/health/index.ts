@@ -1,7 +1,7 @@
-/// <reference types="https://deno.land/x/types/deno.d.ts" />
-
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from '@supabase/supabase-js';
+
+declare const Deno: any;
 
 interface HealthResponse {
   status: 'healthy' | 'unhealthy';
@@ -10,12 +10,12 @@ interface HealthResponse {
   timestamp: string;
 }
 
-Deno.serve(async (req: Request) => {
+const handler = async (req: Request): Promise<Response> => {
   try {
     // Create Supabase client using runtime env vars
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      (globalThis as any).Deno?.env?.get('SUPABASE_URL') ?? '',
+      (globalThis as any).Deno?.env?.get('SUPABASE_ANON_KEY') ?? '',
       {
         auth: {
           persistSession: false
@@ -59,4 +59,6 @@ Deno.serve(async (req: Request) => {
       status: 503
     });
   }
-});
+};
+
+(globalThis as any).Deno?.serve?.(handler);
