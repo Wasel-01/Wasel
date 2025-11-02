@@ -1,0 +1,65 @@
+{
+  "timestamp": "2025-11-02T11:38:09.838Z",
+  "rating": {
+    "totalScore": 100,
+    "maxScore": 145,
+    "percentage": 68.96551724137932,
+    "grade": "C",
+    "rating": "Fair"
+  },
+  "results": {
+    "passed": 6,
+    "failed": 1,
+    "warnings": 1,
+    "tests": [
+      {
+        "name": "Environment Variables",
+        "status": "fail",
+        "message": "9/30 points",
+        "score": 9
+      },
+      {
+        "name": "Supabase Client Setup",
+        "status": "pass",
+        "message": "25/25 points",
+        "score": 25
+      },
+      {
+        "name": "API Services",
+        "status": "pass",
+        "message": "20/20 points",
+        "score": 20
+      },
+      {
+        "name": "Auth Context",
+        "status": "pass",
+        "message": "15/15 points",
+        "score": 15
+      },
+      {
+        "name": "Health Monitoring",
+        "status": "pass",
+        "message": "10/10 points",
+        "score": 10
+      },
+      {
+        "name": "Database Schema",
+        "status": "pass",
+        "message": "10/10 points",
+        "score": 10
+      },
+      {
+        "name": "Security Features",
+        "status": "warn",
+        "message": "4/8 points",
+        "score": 4
+      },
+      {
+        "name": "Component Integration",
+        "status": "pass",
+        "message": "7/7 points",
+        "score": 7
+      }
+    ]
+  }
+}
