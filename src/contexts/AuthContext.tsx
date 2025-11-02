@@ -109,6 +109,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (!supabase) {
       // Demo mode - simulate successful signup
       console.log('🎭 Demo mode: Simulating signup');
+      const { demoUser } = await import('../utils/demoData');
+      const newUser = { ...demoUser, email, full_name: fullName };
+      setUser({ id: newUser.id, email: newUser.email, user_metadata: { full_name: newUser.full_name } } as any);
+      setProfile(newUser as any);
+      setLoading(false);
       return { error: null };
     }
 
@@ -157,8 +162,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Demo mode - simulate successful signin
       console.log('🎭 Demo mode: Simulating signin');
       const { demoUser } = await import('../utils/demoData');
-      setUser({ id: demoUser.id, email: demoUser.email } as any);
+      setUser({ id: demoUser.id, email: demoUser.email, user_metadata: { full_name: demoUser.full_name } } as any);
       setProfile(demoUser as any);
+      setLoading(false);
       return { error: null };
     }
 
