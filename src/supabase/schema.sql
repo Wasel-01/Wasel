@@ -1,6 +1,7 @@
 -- Wassel Database Schema - Production Grade
 -- Version: 1.0.0
 -- Description: Complete database schema for Wassel ride-sharing platform
+-- NOTE: This is PostgreSQL syntax for Supabase. IDE warnings are false positives.
 
 -- Enable necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
