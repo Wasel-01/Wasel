@@ -21,8 +21,6 @@ export function AuthPage({ onSuccess, onBack, initialTab = 'signup' }: AuthPageP
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showSignupConfirm, setShowSignupConfirm] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
-  const firstErrorRef = useState<HTMLInputElement | null>(null)[0];
-
   const getPasswordStrength = (pwd: string) => {
     let score = 0;
     if (pwd.length >= 8) score++;
