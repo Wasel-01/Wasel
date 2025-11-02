@@ -82,5 +82,33 @@
     "modelName": "copilot",
     "lineNumber": 1,
     "characterCount": 33
+  },
+  {
+    "id": "20186804-ebc2-44ef-97ce-f60b918a0eca",
+    "timestamp": 1762078115851,
+    "type": "completion",
+    "prompt": "",
+    "response": "allowJs\": true,\n    \"",
+    "language": "jsonc",
+    "filePath": "Wasel/tsconfig.node.json",
+    "accepted": true,
+    "latency": 0,
+    "modelName": "copilot",
+    "lineNumber": 7,
+    "characterCount": 21
+  },
+  {
+    "id": "5304171e-c343-45c7-828c-cd6be634295e",
+    "timestamp": 1762078116106,
+    "type": "completion",
+    "prompt": "",
+    "response": "{\n  \"compilerOptions\": {\n    \"composite\": true,\n    \"skipLibCheck\": true,\n    \"module\": \"ESNext\",\n    \"moduleResolution\": \"bundler\",\n    \"allowSyntheticDefaultImports\": true,\n    \"allowJs\": true,\n    \"strict\": true,\n    \"types\": [\"node\"]\n  },\n  \"include\": [\"../vite.config.js\", \"scripts/**/*\"]\n}",
+    "language": "jsonc",
+    "filePath": "Wasel/tsconfig.node.json",
+    "accepted": true,
+    "latency": 0,
+    "modelName": "copilot",
+    "lineNumber": 0,
+    "characterCount": 295
   }
 ]
