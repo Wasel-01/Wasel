@@ -161,7 +161,7 @@ export const tripsAPI = {
   },
 
   async getTripById(tripId: string) {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('trips')
       .select('*')
       .eq('id', tripId)
@@ -175,7 +175,7 @@ export const tripsAPI = {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Not authenticated');
 
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('trips')
       .select('*')
       .eq('driver_id', user.user.id);
@@ -200,7 +200,7 @@ export const bookingsAPI = {
     if (!user.user) throw new Error('Not authenticated');
 
     // Fetch trip to get price_per_seat and validate availability
-    const { data: trip, error: tripError } = await (supabase as any)
+    const { data: trip, error: tripError } = await supabase
       .from('trips')
       .select('price_per_seat, available_seats')
       .eq('id', tripId)
@@ -214,7 +214,7 @@ export const bookingsAPI = {
 
     const totalPrice = trip.price_per_seat * seatsRequested;
 
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('bookings')
       .insert({
         trip_id: tripId,
@@ -235,7 +235,7 @@ export const bookingsAPI = {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Not authenticated');
 
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('bookings')
       .select(`
         *,
@@ -264,7 +264,7 @@ export const messagesAPI = {
 
     const sanitizedMessage = secureValidate.userInput(message, config.validation.message.maxLength);
 
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('messages')
       .insert({
         sender_id: user.user.id,
@@ -303,7 +303,7 @@ export const walletAPI = {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Not authenticated');
 
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('profiles')
       .select('id, wallet_balance, total_earned, total_spent')
       .eq('id', user.user.id)
