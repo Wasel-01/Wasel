@@ -158,7 +158,7 @@ export const tripsAPI = {
   },
 
   async getTripById(tripId: string) {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('trips')
       .select('*')
       .eq('id', tripId)
@@ -172,7 +172,7 @@ export const tripsAPI = {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('trips')
       .select('*')
       .eq('driver_id', user.user.id);
@@ -197,7 +197,7 @@ export const bookingsAPI = {
     if (!user.user) throw new Error('Not authenticated');
 
     // Fetch trip to get price_per_seat and validate availability
-    const { data: trip, error: tripError } = await supabase
+    const { data: trip, error: tripError } = await (supabase as any)
       .from('trips')
       .select('price_per_seat, available_seats')
       .eq('id', tripId)
@@ -211,7 +211,7 @@ export const bookingsAPI = {
 
     const totalPrice = trip.price_per_seat * seatsRequested;
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('bookings')
       .insert({
         trip_id: tripId,
@@ -232,7 +232,7 @@ export const bookingsAPI = {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('bookings')
       .select(`
         *,
@@ -261,7 +261,7 @@ export const messagesAPI = {
 
     const sanitizedMessage = secureValidate.userInput(message, config.validation.message.maxLength);
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('messages')
       .insert({
         sender_id: user.user.id,
@@ -283,10 +283,9 @@ export const messagesAPI = {
       .from('messages')
       .select(`
         *,
-        sender:profiles!sender_id(full_name, avatar_url),
-        recipient:profiles!recipient_id(full_name, avatar_url)
+        sender:profiles!messages_sender_id_fkey(full_name, avatar_url)
       `)
-      .or(`sender_id.eq.${user.user.id},recipient_id.eq.${user.user.id}`)
+      .eq('sender_id', user.user.id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -301,13 +300,15 @@ export const walletAPI = {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('profiles')
       .select('id, wallet_balance, total_earned, total_spent')
       .eq('id', user.user.id)
       .single();
 
     if (error) throw error;
+    if (!data) throw new Error('Profile not found');
+
     return {
       user_id: data.id,
       balance: data.wallet_balance || 0,
@@ -356,7 +357,8 @@ export const walletAPI = {
       if (error) {
         throw handleApiError(error, 'Failed to update wallet balance');
       }
-      
+      if (!data) throw new Error('Failed to update profile');
+
       return {
         user_id: data.id,
         balance: data.wallet_balance || 0,

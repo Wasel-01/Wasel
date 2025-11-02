@@ -47,7 +47,7 @@ export const supabase = isSupabaseConfigured
         persistSession: true,
         detectSessionInUrl: true,
         storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-        flowType: 'pace',
+        flowType: 'pkce',
       },
       realtime: { params: { eventsPerSecond: 10 } },
     })
@@ -99,7 +99,7 @@ export async function getUserProfile(userId?: string) {
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
-    .eq('id', uid)
+    .eq('id', uid as string)
     .single();
 
   if (error) {

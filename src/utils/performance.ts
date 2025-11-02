@@ -182,7 +182,7 @@ export const measureCoreWebVitals = () => {
   // First Input Delay
   new PerformanceObserver((list) => {
     for (const entry of list.getEntries()) {
-      const fid = entry.processingStart - entry.startTime;
+      const fid = (entry as any).processingStart - entry.startTime;
       performanceMonitor.recordMetric('fid', fid);
     }
   }).observe({ entryTypes: ['first-input'] });
