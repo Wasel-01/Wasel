@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Bell, Menu, User, Moon, Sun } from 'lucide-react';
-import { Badge } from './ui/badge';
 import { Logo } from './Logo';
 
 interface HeaderProps {
