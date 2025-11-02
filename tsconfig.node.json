@@ -8,5 +8,5 @@
     "strict": true,
     "types": ["node"]
   },
-  "include": ["../vite.config.js", "scripts/**/*"]
+  "include": ["../vite.config.js", "../vite.config.ts", "scripts/**/*"]
 }
