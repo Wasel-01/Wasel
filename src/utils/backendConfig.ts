@@ -42,7 +42,7 @@ export async function checkBackendHealth(): Promise<HealthCheckResult> {
 async function checkDatabaseHealth(): Promise<boolean> {
   try {
     const { data, error } = await supabase.rpc('check_schema_health');
-    return !error && Boolean(data);
+    return !error && data === true;
   } catch {
     return false;
   }

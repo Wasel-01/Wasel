@@ -1,5 +1,4 @@
 // @ts-nocheck
-// Referral service disabled - database tables not configured
 export const referralService = {
   getActiveCampaigns: async () => [],
   createCampaign: async (...args: any[]) => ({}),
