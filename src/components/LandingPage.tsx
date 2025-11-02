@@ -10,16 +10,16 @@ interface LandingPageProps {
 
 export function LandingPage({ onGetStarted, onLogin }: LandingPageProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-teal-50 to-white dark:from-dark-bg dark:to-dark-surface transition-smooth">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b bg-white/80 dark:bg-dark-surface/80 backdrop-blur-sm sticky top-0 z-50 transition-smooth">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Logo size="sm" />
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={onLogin}>
+            <Button variant="ghost" onClick={onLogin} className="dark:text-dark-text dark:hover:bg-dark-surface">
               Sign In
             </Button>
-            <Button className="bg-primary hover:bg-primary/90" onClick={onGetStarted}>
+            <Button className="bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/80 transition-smooth" onClick={onGetStarted}>
               Get Started
             </Button>
           </div>

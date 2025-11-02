@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Bell, Menu, User, Moon, Sun } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { Logo } from './Logo';
-import { notificationService } from '../services/notificationService';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -14,11 +13,6 @@ export function Header({ onMenuClick, onNavigate }: HeaderProps) {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = notificationService.subscribe((notifications) => {
-      const count = notifications.filter(n => !n.read).length;
-      setUnreadCount(count);
-    });
-
     // Check for saved theme preference or default to light mode
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -26,8 +20,6 @@ export function Header({ onMenuClick, onNavigate }: HeaderProps) {
 
     setIsDarkMode(shouldBeDark);
     document.documentElement.classList.toggle('dark', shouldBeDark);
-
-    return unsubscribe;
   }, []);
 
   const toggleDarkMode = () => {
