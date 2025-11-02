@@ -19,6 +19,9 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { AdminDashboard } from './components/AdminDashboard';
 import { DisputeResolution } from './components/DisputeResolution';
 import { VerificationFlow } from './components/VerificationFlow';
+import { CarbonDashboard } from './components/CarbonDashboard';
+import { SocialCircles } from './components/SocialCircles';
+import { CulturalSettings } from './components/CulturalSettings';
 
 type Page = 
   | 'landing'
@@ -36,7 +39,10 @@ type Page =
   | 'analytics'
   | 'admin'
   | 'disputes'
-  | 'verification';
+  | 'verification'
+  | 'carbon'
+  | 'circles'
+  | 'cultural';
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -137,6 +143,9 @@ function AppContent() {
             {currentPage === 'admin' && <AdminDashboard />}
             {currentPage === 'disputes' && user && <DisputeResolution userId={user.id} />}
             {currentPage === 'verification' && user && <VerificationFlow userId={user.id} onComplete={() => handleNavigate('dashboard')} />}
+            {currentPage === 'carbon' && user && <CarbonDashboard userId={user.id} />}
+            {currentPage === 'circles' && user && <SocialCircles userId={user.id} />}
+            {currentPage === 'cultural' && user && <CulturalSettings userId={user.id} />}
           </div>
         </main>
       </div>
