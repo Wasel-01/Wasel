@@ -3,13 +3,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import SmartDashboard from './SmartDashboard';
 import PersonalizedInsights from './PersonalizedInsights';
 import RealTimeWidgets from './RealTimeWidgets';
-import type { DashboardProps, UserStats } from '../types/components';
 
+interface DashboardProps {
+  onNavigate: (page: string) => void;
+}
 
+interface UserStats {
+  totalTrips: number;
+  totalEarnings: number;
+  averageRating: number;
+  preferredRoutes: string[];
+  travelPatterns: any[];
+}
 
-export export default function Dashboard({ onNavigate }: DashboardProps) {
+export default function Dashboard({ onNavigate }: DashboardProps) {
   const [activeTab, setActiveTab] = useState('overview');
-  
+
   // Mock user stats for personalized insights
   const userStats: UserStats = {
     totalTrips: 47,
@@ -33,8 +42,8 @@ export export default function Dashboard({ onNavigate }: DashboardProps) {
         </TabsContent>
 
         <TabsContent value="insights" className="space-y-6">
-          <PersonalizedInsights 
-            userId="user-123" 
+          <PersonalizedInsights
+            userId="user-123"
             userStats={userStats}
           />
         </TabsContent>
