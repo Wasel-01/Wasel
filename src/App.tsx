@@ -16,6 +16,9 @@ import { SafetyCenter } from './components/SafetyCenter';
 import { ReferralProgram } from './components/ReferralProgram';
 import { AdvancedTripAnalytics } from './components/AdvancedTripAnalytics';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { AdminDashboard } from './components/AdminDashboard';
+import { DisputeResolution } from './components/DisputeResolution';
+import { VerificationFlow } from './components/VerificationFlow';
 
 type Page = 
   | 'landing'
@@ -30,7 +33,10 @@ type Page =
   | 'profile'
   | 'safety'
   | 'referrals'
-  | 'analytics';
+  | 'analytics'
+  | 'admin'
+  | 'disputes'
+  | 'verification';
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -128,6 +134,9 @@ function AppContent() {
             {currentPage === 'safety' && <SafetyCenter />}
             {currentPage === 'referrals' && <ReferralProgram />}
             {currentPage === 'analytics' && <AdvancedTripAnalytics />}
+            {currentPage === 'admin' && <AdminDashboard />}
+            {currentPage === 'disputes' && user && <DisputeResolution userId={user.id} />}
+            {currentPage === 'verification' && user && <VerificationFlow userId={user.id} onComplete={() => handleNavigate('dashboard')} />}
           </div>
         </main>
       </div>
