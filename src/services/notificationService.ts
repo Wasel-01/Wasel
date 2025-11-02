@@ -1,193 +1,191 @@
-// Notification Service
+import { supabase } from '../utils/supabase/client';
+
 export type NotificationType = 
-  | 'trip_request' 
-  | 'trip_accepted' 
-  | 'trip_rejected'
-  | 'trip_cancelled'
-  | 'driver_arrived'
-  | 'trip_started'
-  | 'trip_completed'
-  | 'payment_received'
-  | 'payment_sent'
-  | 'message'
-  | 'rating_reminder'
-  | 'verification_approved'
-  | 'verification_rejected'
+  | 'trip_request' | 'trip_accepted' | 'trip_rejected' | 'trip_cancelled'
+  | 'driver_arrived' | 'trip_started' | 'trip_completed'
+  | 'payment_received' | 'payment_sent' | 'message'
+  | 'rating_reminder' | 'verification_approved' | 'verification_rejected'
   | 'safety_alert';
 
 export interface Notification {
   id: string;
+  user_id: string;
   type: NotificationType;
   title: string;
   message: string;
-  timestamp: Date;
   read: boolean;
-  actionUrl?: string;
-  priority: 'low' | 'medium' | 'high';
-  data?: any;
+  created_at: string;
+  action_url?: string;
 }
 
-class NotificationService {
-  private notifications: Notification[] = [];
-  private listeners: ((notifications: Notification[]) => void)[] = [];
+export const notificationService = {
+  // Request notification permission
+  async requestPermission(): Promise<boolean> {
+    if (!('Notification' in window)) {
+      console.warn('Notifications not supported');
+      return false;
+    }
 
-  constructor() {
-    // Initialize with mock notifications
-    this.notifications = this.getMockNotifications();
-  }
+    if (Notification.permission === 'granted') return true;
+    if (Notification.permission === 'denied') return false;
 
-  // Subscribe to notification updates
-  subscribe(callback: (notifications: Notification[]) => void) {
-    this.listeners.push(callback);
-    callback(this.notifications);
-    
-    return () => {
-      this.listeners = this.listeners.filter(l => l !== callback);
-    };
-  }
+    const permission = await Notification.requestPermission();
+    return permission === 'granted';
+  },
 
-  // Add new notification
-  addNotification(notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) {
-    const newNotification: Notification = {
-      ...notification,
-      id: Math.random().toString(36).substring(7),
-      timestamp: new Date(),
-      read: false
-    };
+  // Send browser notification
+  async sendBrowserNotification(title: string, body: string, icon?: string, url?: string) {
+    const hasPermission = await this.requestPermission();
+    if (!hasPermission) return;
 
-    this.notifications.unshift(newNotification);
-    this.notifyListeners();
+    const notification = new Notification(title, {
+      body,
+      icon: icon || '/logo.svg',
+      badge: '/logo.svg',
+      tag: 'wasel-notification',
+      requireInteraction: false
+    });
 
-    // Show browser notification if supported
-    this.showBrowserNotification(newNotification);
+    if (url) {
+      notification.onclick = () => {
+        window.focus();
+        window.location.href = url;
+        notification.close();
+      };
+    }
 
-    return newNotification;
-  }
+    setTimeout(() => notification.close(), 5000);
+  },
+
+  // Create notification in database
+  async createNotification(
+    userId: string,
+    type: NotificationType,
+    title: string,
+    message: string,
+    actionUrl?: string,
+    tripId?: string,
+    bookingId?: string
+  ) {
+    if (!supabase) return;
+
+    const { data, error } = await supabase.from('notifications').insert({
+      user_id: userId,
+      type,
+      title,
+      message,
+      action_url: actionUrl,
+      trip_id: tripId,
+      booking_id: bookingId,
+      priority: type.includes('safety') ? 'high' : 'medium'
+    }).select().single();
+
+    if (error) throw error;
+
+    // Also send browser notification
+    await this.sendBrowserNotification(title, message, undefined, actionUrl);
+
+    return data;
+  },
+
+  // Get user notifications
+  async getNotifications(userId: string, unreadOnly = false) {
+    if (!supabase) return [];
+
+    let query = supabase
+      .from('notifications')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (unreadOnly) {
+      query = query.eq('read', false);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+  },
 
   // Mark notification as read
-  markAsRead(notificationId: string) {
-    const notification = this.notifications.find(n => n.id === notificationId);
-    if (notification) {
-      notification.read = true;
-      this.notifyListeners();
-    }
-  }
+  async markAsRead(notificationId: string) {
+    if (!supabase) return;
+
+    const { error } = await supabase
+      .from('notifications')
+      .update({ read: true, read_at: new Date().toISOString() })
+      .eq('id', notificationId);
+
+    if (error) throw error;
+  },
 
   // Mark all as read
-  markAllAsRead() {
-    this.notifications.forEach(n => n.read = true);
-    this.notifyListeners();
-  }
+  async markAllAsRead(userId: string) {
+    if (!supabase) return;
 
-  // Get unread count
-  getUnreadCount(): number {
-    return this.notifications.filter(n => !n.read).length;
-  }
+    const { error } = await supabase
+      .from('notifications')
+      .update({ read: true, read_at: new Date().toISOString() })
+      .eq('user_id', userId)
+      .eq('read', false);
 
-  // Get all notifications
-  getNotifications(): Notification[] {
-    return this.notifications;
-  }
+    if (error) throw error;
+  },
 
-  // Clear all notifications
-  clearAll() {
-    this.notifications = [];
-    this.notifyListeners();
-  }
+  // Subscribe to real-time notifications
+  subscribeToNotifications(userId: string, callback: (notification: Notification) => void) {
+    if (!supabase) return null;
 
-  // Delete specific notification
-  deleteNotification(notificationId: string) {
-    this.notifications = this.notifications.filter(n => n.id !== notificationId);
-    this.notifyListeners();
-  }
+    return supabase
+      .channel(`notifications:${userId}`)
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
+        (payload: any) => {
+          if (payload.new) {
+            callback(payload.new as Notification);
+            // Send browser notification
+            this.sendBrowserNotification(
+              payload.new.title,
+              payload.new.message,
+              undefined,
+              payload.new.action_url
+            );
+          }
+        }
+      )
+      .subscribe();
+  },
 
-  private notifyListeners() {
-    this.listeners.forEach(listener => listener(this.notifications));
+  // Notification templates
+  templates: {
+    tripRequest: (driverName: string) => ({
+      title: 'New Trip Request',
+      message: `${driverName} wants to book your ride`
+    }),
+    tripAccepted: (driverName: string) => ({
+      title: 'Trip Accepted!',
+      message: `${driverName} accepted your booking`
+    }),
+    driverArrived: (driverName: string) => ({
+      title: 'Driver Arrived',
+      message: `${driverName} is waiting for you`
+    }),
+    tripStarted: () => ({
+      title: 'Trip Started',
+      message: 'Your trip has begun. Have a safe journey!'
+    }),
+    tripCompleted: () => ({
+      title: 'Trip Completed',
+      message: 'Please rate your experience'
+    }),
+    paymentReceived: (amount: number) => ({
+      title: 'Payment Received',
+      message: `You received AED ${amount}`
+    }),
+    safetyAlert: () => ({
+      title: '⚠️ Safety Alert',
+      message: 'Emergency contacts have been notified'
+    })
   }
-
-  private showBrowserNotification(notification: Notification) {
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(notification.title, {
-        body: notification.message,
-        icon: '/wassel-logo.png',
-        badge: '/wassel-badge.png',
-        tag: notification.id
-      });
-    }
-  }
-
-  // Request browser notification permission
-  async requestPermission(): Promise<boolean> {
-    if ('Notification' in window) {
-      const permission = await Notification.requestPermission();
-      return permission === 'granted';
-    }
-    return false;
-  }
-
-  // Generate mock notifications for demo
-  private getMockNotifications(): Notification[] {
-    return [
-      {
-        id: '1',
-        type: 'trip_request',
-        title: 'New Trip Request',
-        message: 'Sarah Ahmed wants to join your trip to Dubai Mall',
-        timestamp: new Date(Date.now() - 5 * 60000),
-        read: false,
-        priority: 'high',
-        actionUrl: '/my-trips'
-      },
-      {
-        id: '2',
-        type: 'trip_accepted',
-        title: 'Trip Request Accepted',
-        message: 'Mohammed Ali accepted your request for tomorrow\'s trip',
-        timestamp: new Date(Date.now() - 30 * 60000),
-        read: false,
-        priority: 'high',
-        actionUrl: '/my-trips'
-      },
-      {
-        id: '3',
-        type: 'driver_arrived',
-        title: 'Driver Arrived',
-        message: 'Your driver is waiting at the pickup location',
-        timestamp: new Date(Date.now() - 2 * 60 * 60000),
-        read: true,
-        priority: 'high'
-      },
-      {
-        id: '4',
-        type: 'payment_received',
-        title: 'Payment Received',
-        message: 'You received 45 AED for your trip to Abu Dhabi',
-        timestamp: new Date(Date.now() - 4 * 60 * 60000),
-        read: true,
-        priority: 'medium',
-        actionUrl: '/payments'
-      },
-      {
-        id: '5',
-        type: 'rating_reminder',
-        title: 'Rate Your Trip',
-        message: 'How was your trip with Ahmed Hassan?',
-        timestamp: new Date(Date.now() - 6 * 60 * 60000),
-        read: false,
-        priority: 'low',
-        actionUrl: '/my-trips'
-      },
-      {
-        id: '6',
-        type: 'verification_approved',
-        title: 'Verification Approved',
-        message: 'Your driver\'s license has been verified!',
-        timestamp: new Date(Date.now() - 24 * 60 * 60000),
-        read: true,
-        priority: 'medium'
-      }
-    ];
-  }
-}
-
-export const notificationService = new NotificationService();
+};
