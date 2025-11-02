@@ -47,7 +47,7 @@ export const supabase = isSupabaseConfigured
         persistSession: true,
         detectSessionInUrl: true,
         storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-        flowType: 'pkce',
+        flowType: 'pace',
       },
       realtime: { params: { eventsPerSecond: 10 } },
     })

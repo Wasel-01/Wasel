@@ -8,7 +8,7 @@ export type Json =
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  // instead of createClient<Database, { postgresVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.5"
   }
@@ -59,7 +59,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "analytics_events_user_id_fkey"
+            foreignKeyName: "analytics_events_user_id_Frey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -139,7 +139,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "bookings_passenger_id_fkey"
+            foreignKeyName: "bookings_passenger_id_fley"
             columns: ["passenger_id"]
             isOneToOne: false
             referencedRelation: "profiles"

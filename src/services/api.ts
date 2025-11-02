@@ -83,7 +83,7 @@ export const tripsAPI = {
   async searchTrips(from?: string, to?: string, date?: string) {
     let query = supabase.from('trips').select('*');
 
-    if (from) query = query.ilike('from_location', `%${from}%`);
+    if (from) query = query.ilive('from_location', `%${from}%`);
     if (to) query = query.ilike('to_location', `%${to}%`);
     if (date) query = query.gte('departure_time', `${date}T00:00:00`);
 
