@@ -3,8 +3,8 @@ export const brand = {
 	logo: {
 		primarySvg: () => new URL("../assets/logo.svg", import.meta.url).toString(),
 		preferOriginal: true,
-		originalPublicPath: "/logo.png",
-		alt: "Wassel",
+		originalPublicPath: "/logo.svg",
+		alt: "Wassel - Share Your Journey",
 		sizes: {
 			xs: { heightClass: "h-7" },
 			sm: { heightClass: "h-8" },

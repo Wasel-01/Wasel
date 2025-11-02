@@ -3,6 +3,7 @@
 ## Brand Overview
 
 **Wassel** (واصل) is a next-generation ride-sharing and carpooling platform connecting travelers across the Middle East. Our brand represents:
+
 - **Convenience** - Smart, effortless travel
 - **Trust** - Verified users and transparent ratings
 - **Affordability** - Shared costs, maximum value
@@ -13,7 +14,8 @@
 Wassel follows the professional **60-30-10 color rule**, a design principle used by leading brands to create balanced, visually appealing interfaces.
 
 ### Primary Color (60% Usage)
-**Teal/Cyan - #008080**
+
+#### Teal/Cyan - #008080
 
 - **Hex**: `#008080`
 - **RGB**: `rgb(0, 128, 128)`
@@ -21,7 +23,7 @@ Wassel follows the professional **60-30-10 color rule**, a design principle used
 - **Usage**: Main brand color for buttons, links, primary CTAs, active states
 - **Application**: Dominates the interface - navigation highlights, primary buttons, key information
 - **Psychology**: Trust, reliability, calmness, professionalism
-- **Examples**: 
+- **Examples**:
   - Primary action buttons
   - Active navigation items
   - Primary icons and indicators
@@ -78,6 +80,7 @@ Wassel follows the professional **60-30-10 color rule**, a design principle used
 ### Neutral Colors
 
 **Light Mode**:
+
 - Background: `#ffffff`
 - Foreground: `oklch(0.145 0 0)` - Near black
 - Muted: `#f5f5f5` - Light gray backgrounds
@@ -85,6 +88,7 @@ Wassel follows the professional **60-30-10 color rule**, a design principle used
 - Border: `rgba(0, 0, 0, 0.1)` - Subtle borders
 
 **Dark Mode**:
+
 - Background: `#0f172a` - Slate 900
 - Foreground: `#f8fafc` - Slate 50
 - Card: `#1e293b` - Slate 800
@@ -96,6 +100,7 @@ Wassel follows the professional **60-30-10 color rule**, a design principle used
 ### 60-30-10 in Practice
 
 #### Landing Page
+
 - **60% Primary (#008080)**: 
   - Hero section background gradient
   - Primary "Get Started" buttons
@@ -116,6 +121,7 @@ Wassel follows the professional **60-30-10 color rule**, a design principle used
   - Urgent notifications
 
 #### Application Dashboard
+
 - **60% Primary**: Active menu items, primary actions, status indicators
 - **30% Secondary**: Card backgrounds, secondary buttons, feature highlights  
 - **10% Accent**: Payment alerts, important notifications, promotional badges
@@ -160,15 +166,18 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 
 ```
 
 ### Font Weights
+
 - Normal: `400`
 - Medium: `500` (headings, buttons, labels)
 
 ### Base Font Size
+
 - Desktop: `16px`
 - Mobile: `16px` (maintain readability)
 
 ### Type Scale (Applied via Tailwind)
 Do not apply these directly - they're handled by globals.css:
+
 - H1: `var(--text-2xl)` - Hero headings
 - H2: `var(--text-xl)` - Section headings
 - H3: `var(--text-lg)` - Card headings
@@ -178,6 +187,7 @@ Do not apply these directly - they're handled by globals.css:
 
 ### Bilingual Support
 The platform supports **Arabic** and **English**:
+
 - Arabic text should use proper RTL (Right-to-Left) formatting
 - Both languages should have equal visual hierarchy
 - Logo text displays: "Wassel" (English) and "واصل" (Arabic)
@@ -187,6 +197,7 @@ The platform supports **Arabic** and **English**:
 See [LOGO_GUIDELINES.md](./LOGO_GUIDELINES.md) for comprehensive logo usage.
 
 ### Quick Reference
+
 - **Standard Navigation**: 32px (h-8) - BlaBlaCar standard
 - **Compact Mobile**: 28px (h-7)
 - **Sidebar**: 32px (h-8)
@@ -206,6 +217,7 @@ See [LOGO_GUIDELINES.md](./LOGO_GUIDELINES.md) for comprehensive logo usage.
 
 ### Spacing Scale
 Use Tailwind's spacing scale:
+
 - `gap-2.5` (10px) - Logo text gap
 - `gap-4` (16px) - Standard component spacing
 - `gap-6` (24px) - Section spacing
@@ -294,11 +306,13 @@ Use Tailwind's spacing scale:
 ## Trip Type Branding
 
 ### Wasel (واصل) - One-Way Trips
+
 - **Primary Color**: Teal (#008080)
 - **Symbol**: → (rightward arrow)
 - **Personality**: Simple, direct, flexible
 
 ### Raje3 (راجع) - Return Trips
+
 - **Secondary Color**: Sage Green (#607D4B)
 - **Symbol**: ↔ (bidirectional arrow)
 - **Personality**: Complete, economical, convenient
@@ -306,6 +320,7 @@ Use Tailwind's spacing scale:
 ## Image Guidelines
 
 ### Photography Style
+
 - Bright, natural lighting
 - Modern, clean vehicles
 - Diverse, friendly people
@@ -314,6 +329,7 @@ Use Tailwind's spacing scale:
 
 ### Image Sources
 Use `unsplash_tool` for images with queries like:
+
 - "modern car interior"
 - "middle east cityscape"
 - "friendly travelers"
@@ -321,6 +337,7 @@ Use `unsplash_tool` for images with queries like:
 
 ### Logo in Images
 When placing logo on images:
+
 - Use white container with shadow for separation
 - Maintain minimum 16px padding
 - Ensure contrast with background
@@ -329,6 +346,7 @@ When placing logo on images:
 
 ### Color Contrast
 All text must meet WCAG AA standards:
+
 - Primary on white: ✅ Pass (4.51:1)
 - Secondary on white: ✅ Pass (4.8:1)
 - Accent on white: ✅ Pass (7.2:1)
@@ -342,12 +360,14 @@ className="focus:ring-2 focus:ring-primary focus:ring-offset-2"
 ## Brand Voice
 
 ### Tone
+
 - **Friendly** - Approachable, warm, conversational
 - **Professional** - Trustworthy, reliable, safe
 - **Empowering** - You're in control
 - **Sustainable** - Eco-conscious, responsible
 
 ### Language
+
 - Use clear, simple language
 - Avoid jargon
 - Be bilingual (Arabic/English)
@@ -363,12 +383,14 @@ className="focus:ring-2 focus:ring-primary focus:ring-offset-2"
 ## Competitor Differentiation
 
 ### vs. BlaBlaCar
+
 - **Middle East Focus**: Tailored for regional needs
 - **Bilingual**: Arabic/English by default
 - **Trip Classification**: Wasel/Raje3 system
 - **Similar UX**: Compact logo sizing, clean interface
 
 ### vs. Uber/Careem
+
 - **Carpooling Focus**: Shared journeys, not solo rides
 - **Long Distance**: Inter-city travel
 - **Community**: Build relationships, not transactions
@@ -377,6 +399,7 @@ className="focus:ring-2 focus:ring-primary focus:ring-offset-2"
 ## Implementation Checklist
 
 When creating new components:
+
 - [ ] Use 60-30-10 color rule (primary, secondary, accent)
 - [ ] Logo sized correctly (32px for navigation)
 - [ ] Proper spacing (gap-4, p-6)
