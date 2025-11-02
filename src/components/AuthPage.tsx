@@ -54,10 +54,20 @@ export function AuthPage({ onSuccess, onBack, initialTab = 'signup' }: AuthPageP
     }
 
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      if (form.dataset.mode === 'signup') {
+        const firstName = String(data.get('first_name') || '');
+        const lastName = String(data.get('last_name') || '');
+        await authAPI.signUp(email, password, firstName, lastName, phone);
+      } else {
+        await authAPI.signIn(email, password);
+      }
       onSuccess();
-    }, 800);
+    } catch (error: any) {
+      toast.error(error?.message || 'Authentication failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleForgotPassword = async () => {

@@ -17,11 +17,14 @@ export const growthMetricsService = {
   },
   
   trackConversion: (userId: string, event: string) => {
-    console.log('Conversion tracked:', { userId, event });
+    const sanitizedUserId = String(userId || '').replace(/[\r\n\t<>"'&]/g, '').substring(0, 100);
+    const sanitizedEvent = String(event || '').replace(/[\r\n\t<>"'&]/g, '').substring(0, 100);
+    console.log('Conversion tracked:', { userId: sanitizedUserId, event: sanitizedEvent });
   },
   
   calculateRetention: (cohort: string) => {
-    console.log('Calculating retention for cohort:', cohort);
+    const sanitizedCohort = String(cohort || '').replace(/[\r\n\t<>"'&]/g, '').substring(0, 100);
+    console.log('Calculating retention for cohort:', sanitizedCohort);
     return 85.0;
   }
 };

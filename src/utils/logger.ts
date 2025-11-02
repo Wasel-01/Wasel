@@ -7,7 +7,10 @@ const isDevelopment = (import.meta as any).env?.DEV;
 const sanitizeMessage = (message: string): string => {
   try {
     return String(message || '')
-      .replace(/[\r\n\t<>"'&]/g, ' ')
+      .replace(/[\r\n\t<>"'&\x00-\x1f\x7f-\x9f]/g, ' ')
+      .replace(/javascript:/gi, '')
+      .replace(/data:/gi, '')
+      .replace(/vbscript:/gi, '')
       .substring(0, 1000);
   } catch {
     return 'Invalid message';

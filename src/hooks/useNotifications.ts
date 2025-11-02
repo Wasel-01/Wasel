@@ -63,10 +63,14 @@ export function useNotifications() {
             try {
               const notif = payload.new as Notification;
               const sanitizedTitle = String(notif.title || 'New notification')
-                .replace(/[<>"'&\r\n\t]/g, '')
+                .replace(/[<>"'&\r\n\t\x00-\x1f\x7f-\x9f]/g, '')
+                .replace(/javascript:/gi, '')
+                .replace(/data:/gi, '')
                 .substring(0, 100);
               const sanitizedMessage = String(notif.message || '')
-                .replace(/[<>"'&\r\n\t]/g, '')
+                .replace(/[<>"'&\r\n\t\x00-\x1f\x7f-\x9f]/g, '')
+                .replace(/javascript:/gi, '')
+                .replace(/data:/gi, '')
                 .substring(0, 200);
               new window.Notification(sanitizedTitle, {
                 body: sanitizedMessage,

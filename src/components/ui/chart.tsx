@@ -81,10 +81,15 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const sanitizeCSS = (css: string) => {
     try {
       return String(css || '')
-        .replace(/[<>"'&]/g, '')
+        .replace(/[<>"'&\r\n\t]/g, '')
         .replace(/javascript:/gi, '')
         .replace(/expression\(/gi, '')
-        .replace(/url\(/gi, '');
+        .replace(/url\(/gi, '')
+        .replace(/import/gi, '')
+        .replace(/@/g, '')
+        .replace(/\/\*/g, '')
+        .replace(/\*\//g, '')
+        .substring(0, 10000);
     } catch {
       return '';
     }
