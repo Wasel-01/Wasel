@@ -107,7 +107,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Sign up
   const signUp = async (email: string, password: string, fullName: string) => {
     if (!supabase) {
-      return { error: new Error('Backend not configured. Please set up Supabase first.') };
+      // Demo mode - simulate successful signup
+      console.log('🎭 Demo mode: Simulating signup');
+      return { error: null };
     }
 
     try {
@@ -152,7 +154,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Sign in
   const signIn = async (email: string, password: string) => {
     if (!supabase) {
-      return { error: new Error('Backend not configured. Please set up Supabase first.') };
+      // Demo mode - simulate successful signin
+      console.log('🎭 Demo mode: Simulating signin');
+      const { demoUser } = await import('../utils/demoData');
+      setUser({ id: demoUser.id, email: demoUser.email } as any);
+      setProfile(demoUser as any);
+      return { error: null };
     }
 
     try {

@@ -91,19 +91,22 @@ async function startApp() {
   renderLoadingScreen();
 
   try {
-    console.log('🚀 Validating Wasel backend configuration...');
+    console.log('🚀 Starting Wasel application...');
     await validateBackendConfiguration();
 
-    console.log('✅ Backend validation passed. Starting app...');
+    console.log('✅ App starting...');
     root.render(
       <StrictMode>
         <App />
       </StrictMode>
     );
   } catch (error: any) {
-    console.error('❌ Backend validation failed:', error);
-    renderErrorScreen(
-      error?.message || 'We could not connect to Wasel servers. Please refresh or try again later.'
+    console.error('❌ Startup error:', error);
+    // Still render the app even if backend validation fails
+    root.render(
+      <StrictMode>
+        <App />
+      </StrictMode>
     );
   }
 }

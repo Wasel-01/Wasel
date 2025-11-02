@@ -1,4 +1,4 @@
-simport { useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { MapPin, Clock, Users, CreditCard, Info } from 'lucide-react';
 import { Button } from '../ui/button';

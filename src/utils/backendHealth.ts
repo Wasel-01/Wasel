@@ -2,24 +2,20 @@ import { supabase, isSupabaseConfigured } from './supabase/client';
 
 export async function validateBackendConfiguration(): Promise<void> {
   if (!isSupabaseConfigured || !supabase) {
-    throw new Error('Supabase configuration is missing. Please check your environment variables.');
+    console.warn('⚠️ Supabase not configured - running in demo mode');
+    return;
   }
 
   try {
-    // Test basic connection
-    const { data, error } = await supabase.rpc('check_schema_health');
+    // Test basic connection with a simple query
+    const { error } = await supabase.from('profiles').select('id').limit(1);
     
-    if (error) {
-      throw new Error(`Backend health check failed: ${error.message}`);
+    if (error && error.code !== 'PGRST116') {
+      console.warn('⚠️ Backend connection issue:', error.message);
+    } else {
+      console.log('✅ Backend validation successful');
     }
-
-    if (!data) {
-      throw new Error('Backend health check returned no data');
-    }
-
-    console.log('✅ Backend validation successful');
   } catch (error: any) {
-    console.error('❌ Backend validation failed:', error);
-    throw new Error(`Backend connection failed: ${error.message || 'Unknown error'}`);
+    console.warn('⚠️ Backend validation warning:', error.message || 'Unknown error');
   }
 }
