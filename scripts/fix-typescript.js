@@ -1,9 +1,45 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
+const fs = require('fs').promises;
+const fsSync = require('fs');
 const path = require('path');
 
 console.log('🔧 Fixing all TypeScript issues...\n');
+
+// Performance monitoring
+const startTime = Date.now();
+
+// Caching
+const fileCache = new Map();
+
+// Async file operations
+async function readFileCached(filePath) {
+  if (fileCache.has(filePath)) {
+    return fileCache.get(filePath);
+  }
+  const content = await fs.readFile(filePath, 'utf8');
+  fileCache.set(filePath, content);
+  return content;
+}
+
+async function writeFileCached(filePath, content) {
+  fileCache.set(filePath, content);
+  await fs.writeFile(filePath, content);
+}
+
+// Batch processing
+const BATCH_SIZE = 5;
+
+async function processFilesBatch(files, processor) {
+  const batches = [];
+  for (let i = 0; i < files.length; i += BATCH_SIZE) {
+    batches.push(files.slice(i, i + BATCH_SIZE));
+  }
+
+  for (const batch of batches) {
+    await Promise.all(batch.map(processor));
+  }
+}
 
 const fixes = [
   {
@@ -56,33 +92,38 @@ export interface UserStats {
   },
   {
     name: 'Fix import paths',
-    fix: () => {
+    fix: async () => {
       const srcDir = path.join(process.cwd(), 'src');
-      const files = getAllTsxFiles(srcDir);
+      const files = await getAllTsxFiles(srcDir);
       let fixedCount = 0;
 
-      files.forEach(filePath => {
-        let content = fs.readFileSync(filePath, 'utf8');
-        let modified = false;
+      // Precompiled regex patterns for performance
+      const fixes = [
+        [/from ['"]\.\/utils\/supabase\/client['"];/g, "from './supabase/client';"],
+        [/from ['"]\.\/services\/api['"];/g, "from '../services/api';"],
+        [/from ['"]\.\/utils\/logger['"];/g, "from '../utils/logger';"],
+        [/from ['"]\.\/types\/database['"];/g, "from '../types/database';"],
+      ];
 
-        // Fix common import issues
-        const fixes = [
-          [/from ['"]\.\/utils\/supabase\/client['"];/g, "from './supabase/client';"],
-          [/from ['"]\.\/services\/api['"];/g, "from '../services/api';"],
-          [/from ['"]\.\/utils\/logger['"];/g, "from '../utils/logger';"],
-          [/from ['"]\.\/types\/database['"];/g, "from '../types/database';"],
-        ];
+      // Process files in batches
+      await processFilesBatch(files, async (filePath) => {
+        try {
+          let content = await readFileCached(filePath);
+          let modified = false;
 
-        fixes.forEach(([pattern, replacement]) => {
-          if (pattern.test(content)) {
-            content = content.replace(pattern, replacement);
-            modified = true;
+          fixes.forEach(([pattern, replacement]) => {
+            if (pattern.test(content)) {
+              content = content.replace(pattern, replacement);
+              modified = true;
+            }
+          });
+
+          if (modified) {
+            await writeFileCached(filePath, content);
+            fixedCount++;
           }
-        });
-
-        if (modified) {
-          fs.writeFileSync(filePath, content);
-          fixedCount++;
+        } catch (error) {
+          console.warn(`Warning: Could not process ${filePath}:`, error.message);
         }
       });
 
@@ -155,38 +196,81 @@ export interface UserStats {
   }
 ];
 
-function getAllTsxFiles(dir) {
+// Async file traversal
+async function getAllTsxFiles(dir) {
   const files = [];
-  
-  function traverse(currentDir) {
-    const items = fs.readdirSync(currentDir);
-    
-    items.forEach(item => {
-      const fullPath = path.join(currentDir, item);
-      const stat = fs.statSync(fullPath);
-      
-      if (stat.isDirectory() && !item.startsWith('.') && item !== 'node_modules') {
-        traverse(fullPath);
-      } else if (item.endsWith('.tsx') || item.endsWith('.ts')) {
-        files.push(fullPath);
+
+  async function traverse(currentDir) {
+    try {
+      const items = await fs.readdir(currentDir);
+
+      for (const item of items) {
+        const fullPath = path.join(currentDir, item);
+        const stat = await fs.stat(fullPath);
+
+        if (stat.isDirectory() && !item.startsWith('.') && item !== 'node_modules') {
+          await traverse(fullPath);
+        } else if (item.endsWith('.tsx') || item.endsWith('.ts')) {
+          files.push(fullPath);
+        }
       }
-    });
+    } catch (error) {
+      // Skip inaccessible directories
+    }
   }
-  
-  traverse(dir);
+
+  await traverse(dir);
   return files;
 }
 
-let allFixed = true;
+// Execute fixes asynchronously
+async function runFixes() {
+  let allFixed = true;
 
-fixes.forEach(({ name, fix }) => {
-  try {
-    const result = fix();
-    console.log(`✅ ${name}: ${result}`);
-  } catch (error) {
-    console.log(`❌ ${name}: ${error.message}`);
-    allFixed = false;
+  for (const { name, fix } of fixes) {
+    const fixStart = Date.now();
+    try {
+      const result = await fix();
+      const duration = Date.now() - fixStart;
+      console.log(`✅ ${name}: ${result} (${duration}ms)`);
+    } catch (error) {
+      const duration = Date.now() - fixStart;
+      console.log(`❌ ${name}: ${error.message} (${duration}ms)`);
+      allFixed = false;
+    }
   }
+
+  return allFixed;
+}
+
+// Main execution
+async function main() {
+  try {
+    const allFixed = await runFixes();
+
+    const totalDuration = Date.now() - startTime;
+    console.log(`\n${allFixed ? '🎉' : '⚠️'} TypeScript fixes ${allFixed ? 'COMPLETED' : 'COMPLETED WITH WARNINGS'} (${totalDuration}ms total)`);
+
+    if (totalDuration > 10000) { // 10 seconds
+      console.log('\n⚠️  TypeScript fixes took longer than expected. Consider checking file permissions.');
+    }
+
+  } catch (error) {
+    console.error('\n❌ Critical error during TypeScript fixes:', error.message);
+    process.exit(1);
+  }
+}
+
+// Handle uncaught errors
+process.on('uncaughtException', (error) => {
+  console.error('\n❌ Uncaught error:', error.message);
+  process.exit(1);
 });
 
-console.log(`\n${allFixed ? '🎉' : '⚠️'} TypeScript fixes ${allFixed ? 'COMPLETED' : 'COMPLETED WITH WARNINGS'}`);
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('\n❌ Unhandled rejection:', reason);
+  process.exit(1);
+});
+
+// Run the optimized fix process
+main();

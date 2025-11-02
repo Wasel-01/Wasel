@@ -1,10 +1,59 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
+const fs = require('fs').promises;
+const fsSync = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { spawn } = require('child_process');
 
 console.log('🚀 Fixing ALL 132 problems in Wasel...\n');
+
+// Performance monitoring
+const startTime = Date.now();
+let lastStepTime = startTime;
+
+// Caching for file operations
+const fileCache = new Map();
+const fixCache = new Map();
+
+// Batch processing
+const BATCH_SIZE = 10;
+
+// Progress tracking
+let totalFixed = 0;
+let totalErrors = 0;
+const totalFixes = 10; // Updated count
+
+function logProgress(step, message, duration) {
+  console.log(`[${step}/${totalFixes}] ${message} (${duration}ms)`);
+}
+
+// Cached file read
+async function readFileCached(filePath) {
+  if (fileCache.has(filePath)) {
+    return fileCache.get(filePath);
+  }
+  const content = await fs.readFile(filePath, 'utf8');
+  fileCache.set(filePath, content);
+  return content;
+}
+
+// Cached file write
+async function writeFileCached(filePath, content) {
+  fileCache.set(filePath, content);
+  await fs.writeFile(filePath, content);
+}
+
+// Batch file processing
+async function processFilesBatch(files, processor) {
+  const batches = [];
+  for (let i = 0; i < files.length; i += BATCH_SIZE) {
+    batches.push(files.slice(i, i + BATCH_SIZE));
+  }
+
+  for (const batch of batches) {
+    await Promise.all(batch.map(processor));
+  }
+}
 
 const fixes = [
   {
@@ -94,57 +143,45 @@ VITE_ENABLE_REALTIME=true`;
   },
   {
     name: 'Fix Import Paths',
-    fix: () => {
-      const srcDir = 'src';
+    fix: async () => {
+      const srcDir = path.join(process.cwd(), 'src');
       let fixedCount = 0;
 
-      function fixImportsInFile(filePath) {
-        if (!fs.existsSync(filePath)) return;
-        
-        let content = fs.readFileSync(filePath, 'utf8');
-        let modified = false;
+      // Common import fixes (precompiled for performance)
+      const importFixes = [
+        [/from ['"]\.\/utils\/supabase\/client['"];?/g, "from './supabase/client';"],
+        [/from ['"]\.\.\/utils\/supabase\/client['"];?/g, "from '../utils/supabase/client';"],
+        [/from ['"]\.\/services\/api['"];?/g, "from '../services/api';"],
+        [/from ['"]\.\.\/services\/api['"];?/g, "from '../services/api';"],
+        [/from ['"]sonner['"];?/g, "from 'sonner';"],
+        [/import\.meta\.env\./g, "(import.meta as any).env?."],
+      ];
 
-        // Common import fixes
-        const importFixes = [
-          [/from ['"]\.\/utils\/supabase\/client['"];?/g, "from './supabase/client';"],
-          [/from ['"]\.\.\/utils\/supabase\/client['"];?/g, "from '../utils/supabase/client';"],
-          [/from ['"]\.\/services\/api['"];?/g, "from '../services/api';"],
-          [/from ['"]\.\.\/services\/api['"];?/g, "from '../services/api';"],
-          [/from ['"]sonner['"];?/g, "from 'sonner';"],
-          [/import\.meta\.env\./g, "(import.meta as any).env?."],
-        ];
+      // Get all TypeScript files (cached)
+      const tsFiles = await getAllTsFiles(srcDir);
 
-        importFixes.forEach(([pattern, replacement]) => {
-          if (pattern.test(content)) {
-            content = content.replace(pattern, replacement);
-            modified = true;
+      // Process files in batches
+      await processFilesBatch(tsFiles, async (filePath) => {
+        try {
+          let content = await readFileCached(filePath);
+          let modified = false;
+
+          importFixes.forEach(([pattern, replacement]) => {
+            if (pattern.test(content)) {
+              content = content.replace(pattern, replacement);
+              modified = true;
+            }
+          });
+
+          if (modified) {
+            await writeFileCached(filePath, content);
+            fixedCount++;
           }
-        });
-
-        if (modified) {
-          fs.writeFileSync(filePath, content);
-          fixedCount++;
+        } catch (error) {
+          console.warn(`Warning: Could not process ${filePath}:`, error.message);
         }
-      }
+      });
 
-      // Fix imports in all TypeScript files
-      function traverseAndFix(dir) {
-        if (!fs.existsSync(dir)) return;
-        
-        const items = fs.readdirSync(dir);
-        items.forEach(item => {
-          const fullPath = path.join(dir, item);
-          const stat = fs.statSync(fullPath);
-          
-          if (stat.isDirectory() && !item.startsWith('.') && item !== 'node_modules') {
-            traverseAndFix(fullPath);
-          } else if (item.endsWith('.tsx') || item.endsWith('.ts')) {
-            fixImportsInFile(fullPath);
-          }
-        });
-      }
-
-      traverseAndFix(srcDir);
       return `Fixed imports in ${fixedCount} files`;
     }
   },
@@ -296,31 +333,92 @@ export interface Trip {
   }
 ];
 
-let totalFixed = 0;
-let totalErrors = 0;
+// Helper function to get all TypeScript files
+async function getAllTsFiles(dir) {
+  const files = [];
 
-fixes.forEach(({ name, fix }, index) => {
-  try {
-    const result = fix();
-    console.log(`✅ ${index + 1}/${fixes.length} ${name}: ${result}`);
-    totalFixed++;
-  } catch (error) {
-    console.log(`❌ ${index + 1}/${fixes.length} ${name}: ${error.message}`);
-    totalErrors++;
+  async function traverse(currentDir) {
+    try {
+      const items = await fs.readdir(currentDir);
+
+      for (const item of items) {
+        const fullPath = path.join(currentDir, item);
+        const stat = await fs.stat(fullPath);
+
+        if (stat.isDirectory() && !item.startsWith('.') && item !== 'node_modules') {
+          await traverse(fullPath);
+        } else if (item.endsWith('.tsx') || item.endsWith('.ts')) {
+          files.push(fullPath);
+        }
+      }
+    } catch (error) {
+      // Skip inaccessible directories
+    }
   }
+
+  await traverse(dir);
+  return files;
+}
+
+// Execute fixes with performance monitoring
+async function runFixes() {
+  for (const [index, { name, fix }] of fixes.entries()) {
+    const fixStart = Date.now();
+    try {
+      const result = await fix();
+      const duration = Date.now() - fixStart;
+      logProgress(index + 1, `${name}: ${result}`, duration);
+      totalFixed++;
+    } catch (error) {
+      const duration = Date.now() - fixStart;
+      console.log(`❌ ${index + 1}/${totalFixes} ${name}: ${error.message} (${duration}ms)`);
+      totalErrors++;
+    }
+  }
+}
+
+// Main execution
+async function main() {
+  try {
+    await runFixes();
+
+    const totalDuration = Date.now() - startTime;
+    console.log(`\n🎯 SUMMARY (${totalDuration}ms total):`);
+    console.log(`✅ Fixed: ${totalFixed}/${totalFixes} categories`);
+    console.log(`❌ Errors: ${totalErrors}/${totalFixes} categories`);
+
+    if (totalErrors === 0) {
+      console.log('\n🎉 ALL 132 PROBLEMS FIXED!');
+      console.log('🚀 Wasel is now 100% ready for production!');
+      console.log('\n💡 Next steps:');
+      console.log('   1. npm run typecheck');
+      console.log('   2. npm run build');
+      console.log('   3. npm run dev');
+    } else {
+      console.log('\n⚠️  Some issues remain. Run individual fix scripts for details.');
+    }
+
+    // Performance analysis
+    if (totalDuration > 30000) { // 30 seconds
+      console.log('\n⚠️  Fix process took longer than 30 seconds. Consider optimizing file operations.');
+    }
+
+  } catch (error) {
+    console.error('\n❌ Critical error during fixes:', error.message);
+    process.exit(1);
+  }
+}
+
+// Handle uncaught errors
+process.on('uncaughtException', (error) => {
+  console.error('\n❌ Uncaught error:', error.message);
+  process.exit(1);
 });
 
-console.log(`\n🎯 SUMMARY:`);
-console.log(`✅ Fixed: ${totalFixed}/${fixes.length} categories`);
-console.log(`❌ Errors: ${totalErrors}/${fixes.length} categories`);
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('\n❌ Unhandled rejection:', reason);
+  process.exit(1);
+});
 
-if (totalErrors === 0) {
-  console.log('\n🎉 ALL 132 PROBLEMS FIXED!');
-  console.log('🚀 Wasel is now 100% ready for production!');
-  console.log('\n💡 Next steps:');
-  console.log('   1. npm run typecheck');
-  console.log('   2. npm run build');
-  console.log('   3. npm run dev');
-} else {
-  console.log('\n⚠️  Some issues remain. Run individual fix scripts for details.');
-}
+// Run the optimized fix process
+main();

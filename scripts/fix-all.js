@@ -1,10 +1,32 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
+const fs = require('fs').promises;
+const fsSync = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { spawn } = require('child_process');
 
 console.log('🔧 Fixing all remaining issues in Wasel...\n');
+
+// Performance monitoring
+const startTime = Date.now();
+
+// Caching
+const fileCache = new Map();
+
+// Async file operations
+async function readFileCached(filePath) {
+  if (fileCache.has(filePath)) {
+    return fileCache.get(filePath);
+  }
+  const content = await fs.readFile(filePath, 'utf8');
+  fileCache.set(filePath, content);
+  return content;
+}
+
+async function writeFileCached(filePath, content) {
+  fileCache.set(filePath, content);
+  await fs.writeFile(filePath, content);
+}
 
 const fixes = [
   {
@@ -73,24 +95,62 @@ VITE_APP_VERSION=0.1.0`;
   }
 ];
 
-let allFixed = true;
+// Execute fixes asynchronously
+async function runFixes() {
+  let allFixed = true;
 
-fixes.forEach(({ name, fix }) => {
-  try {
-    const result = fix();
-    console.log(`✅ ${name}: ${result}`);
-  } catch (error) {
-    console.log(`❌ ${name}: ${error.message}`);
-    allFixed = false;
+  for (const { name, fix } of fixes) {
+    const fixStart = Date.now();
+    try {
+      const result = await fix();
+      const duration = Date.now() - fixStart;
+      console.log(`✅ ${name}: ${result} (${duration}ms)`);
+    } catch (error) {
+      const duration = Date.now() - fixStart;
+      console.log(`❌ ${name}: ${error.message} (${duration}ms)`);
+      allFixed = false;
+    }
   }
+
+  return allFixed;
+}
+
+// Main execution
+async function main() {
+  try {
+    const allFixed = await runFixes();
+
+    const totalDuration = Date.now() - startTime;
+    console.log(`\n${allFixed ? '🎉' : '⚠️'} Fix process ${allFixed ? 'COMPLETED' : 'COMPLETED WITH WARNINGS'} (${totalDuration}ms total)`);
+
+    if (allFixed) {
+      console.log('\n🚀 Wasel is now ready for production!');
+      console.log('💡 Next steps:');
+      console.log('   1. Update .env with your credentials');
+      console.log('   2. Run "npm run dev" to start development');
+      console.log('   3. Run "npm run build" for production');
+    }
+
+    if (totalDuration > 15000) { // 15 seconds
+      console.log('\n⚠️  Fix process took longer than expected. Consider checking file permissions or disk speed.');
+    }
+
+  } catch (error) {
+    console.error('\n❌ Critical error during fixes:', error.message);
+    process.exit(1);
+  }
+}
+
+// Handle uncaught errors
+process.on('uncaughtException', (error) => {
+  console.error('\n❌ Uncaught error:', error.message);
+  process.exit(1);
 });
 
-console.log(`\n${allFixed ? '🎉' : '⚠️'} Fix process ${allFixed ? 'COMPLETED' : 'COMPLETED WITH WARNINGS'}`);
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('\n❌ Unhandled rejection:', reason);
+  process.exit(1);
+});
 
-if (allFixed) {
-  console.log('\n🚀 Wasel is now ready for production!');
-  console.log('💡 Next steps:');
-  console.log('   1. Update .env with your credentials');
-  console.log('   2. Run "npm run dev" to start development');
-  console.log('   3. Run "npm run build" for production');
-}
+// Run the optimized fix process
+main();
