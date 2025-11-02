@@ -2,10 +2,10 @@
 // Referral service disabled - database tables not configured
 export const referralService = {
   getActiveCampaigns: async () => [],
-  createCampaign: async () => ({}),
-  getReferralCode: async () => null,
-  getUserReferrals: async () => [],
-  getUserRewards: async () => [],
+  createCampaign: async (...args: any[]) => ({}),
+  getReferralCode: async (...args: any[]) => null,
+  getUserReferrals: async (...args: any[]) => [],
+  getUserRewards: async (...args: any[]) => [],
 };
 
 export interface IncentiveCampaign {
