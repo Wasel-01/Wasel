@@ -25,7 +25,7 @@ export function NotificationCenter() {
 
   useEffect(() => {
     // Subscribe to notification updates
-    const unsubscribe = notificationService.subscribe(setNotifications);
+    const unsubscribe = notificationService.subscribe((n: any) => setNotifications(prev => [...prev, n]));
     return unsubscribe;
   }, []);
 
@@ -73,7 +73,7 @@ export function NotificationCenter() {
     }
   };
 
-  const getPriorityBadge = (priority: Notification['priority']) => {
+  const getPriorityBadge = (priority: any) => {
     const variants = {
       high: 'destructive',
       medium: 'default',
@@ -213,7 +213,7 @@ export function NotificationCenter() {
                         <div className="flex items-center justify-between gap-2 flex-wrap">
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <Clock className="size-3" />
-                            {formatTime(notification.timestamp)}
+                            {formatTime(new Date(notification.timestamp || notification.created_at))}
                           </div>
 
                           <div className="flex items-center gap-2">

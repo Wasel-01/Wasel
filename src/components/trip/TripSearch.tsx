@@ -70,8 +70,8 @@ export default function TripSearch({ onSearch }: TripSearchProps) {
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
                 <DatePicker
-                  date={criteria.date}
-                  onSelect={(date) => date && setCriteria({ ...criteria, date })}
+                  value={criteria.date}
+                  onChange={(date) => date && setCriteria({ ...criteria, date })}
                 />
               </div>
             </div>

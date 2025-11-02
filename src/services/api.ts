@@ -5,6 +5,9 @@ import { sanitize, secureValidate } from '../utils/security';
 
 const config = getConfig();
 
+// Export supabase client for components that need direct access
+export { supabase };
+
 // Performance tracking wrapper
 function withPerformanceTracking<T extends any[], R>(
   fn: (...args: T) => Promise<R>,

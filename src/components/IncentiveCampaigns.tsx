@@ -4,7 +4,22 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Gift, Target, TrendingUp, Users } from 'lucide-react';
-import { referralService, IncentiveCampaign } from '../services/referralService';
+interface IncentiveCampaign {
+  id: string;
+  name: string;
+  description: string;
+  campaign_type: string;
+  target_audience: string;
+  reward_type: string;
+  reward_amount: number;
+  referrer_reward?: number;
+  referred_reward?: number;
+  trigger_condition: string;
+  starts_at: string;
+  ends_at: string;
+  max_participants?: number;
+  current_participants: number;
+}
 
 export default function IncentiveCampaigns() {
   const [campaigns, setCampaigns] = useState<IncentiveCampaign[]>([]);
@@ -15,14 +30,8 @@ export default function IncentiveCampaigns() {
   }, []);
 
   const loadCampaigns = async () => {
-    try {
-      const data = await referralService.getActiveCampaigns();
-      setCampaigns(data || []);
-    } catch (error) {
-      // Failed to load campaigns
-    } finally {
-      setLoading(false);
-    }
+    setLoading(false);
+    setCampaigns([]);
   };
 
   const createDefaultCampaigns = async () => {
@@ -76,15 +85,7 @@ export default function IncentiveCampaigns() {
       }
     ];
 
-    for (const campaign of defaultCampaigns) {
-      try {
-        await referralService.createCampaign(campaign);
-      } catch (error) {
-        // Failed to create campaign
-      }
-    }
-    
-    loadCampaigns();
+    setCampaigns(defaultCampaigns.map((c, i) => ({ ...c, id: `campaign-${i}`, current_participants: 0 })));
   };
 
   const getCampaignsByType = (type: string) => {

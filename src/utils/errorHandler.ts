@@ -30,7 +30,7 @@ export class NotFoundError extends Error {
   }
 }
 
-export const handleApiError = (error: any, context?: string): Error => {
+export const handleApiError = (error: any, context?: string): AppError => {
   // Sanitize error message to prevent log injection
   const sanitizeMessage = (msg: string): string => {
     return String(msg || 'Unknown error')
@@ -82,11 +82,15 @@ export const handleApiError = (error: any, context?: string): Error => {
   }
 
   // Generic error
-  const errorMessage = context 
+  const errorMessage = context
     ? `${context}: ${sanitizeMessage(error?.message || 'An unexpected error occurred')}`
     : sanitizeMessage(error?.message || 'An unexpected error occurred');
-    
-  return new Error(errorMessage);
+
+  return {
+    message: errorMessage,
+    code: 'GENERIC_ERROR',
+    statusCode: 500
+  };
 };
 
 export const validateInput = {

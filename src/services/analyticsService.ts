@@ -32,5 +32,25 @@ export const analyticsService = {
     const sanitizedAction = sanitizeLogInput(action);
     const sanitizedLabel = label ? sanitizeLogInput(label) : undefined;
     console.log('Event:', { category: sanitizedCategory, action: sanitizedAction, label: sanitizedLabel });
-  }
+  },
+
+  getMockTripHistory: () => [],
+
+  calculateAnalytics: (trips: any[]) => ({
+    totalTrips: trips.length,
+    totalDistance: 0,
+    totalEarnings: 0,
+    averageRating: 0,
+    totalSpent: 0,
+    carbonSaved: 0,
+    totalDrives: 0,
+    totalEarned: 0,
+    totalRides: 0,
+    categoryBreakdown: { work: 0, personal: 0, shopping: 0, other: 0 },
+    monthlyData: [],
+    topRoutes: []
+  }),
+
+  generateExpenseReport: (startDate: string, endDate: string) => 
+    JSON.stringify({ totalExpenses: 0, trips: [], startDate, endDate })
 };

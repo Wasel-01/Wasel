@@ -219,8 +219,8 @@ export function MyTrips() {
               <DialogTitle>Live Trip Tracking</DialogTitle>
             </DialogHeader>
             <LiveTripMap
-              tripId={selectedTripForTracking.id.toString()}
-              route={selectedTripForTracking.route || []}
+              tripId={(selectedTripForTracking as any).id.toString()}
+              route={(selectedTripForTracking as any).route || []}
               isDriver={false}
               allowLocationSharing={true}
               onShareLocation={handleLocationShare}

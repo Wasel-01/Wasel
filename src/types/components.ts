@@ -14,3 +14,12 @@ export interface UserStats {
   preferredRoutes: string[];
   travelPatterns: unknown[];
 }
+
+export interface PersonalizedInsightsProps {
+  userId: string;
+  userStats?: UserStats;
+}
+
+export interface RealTimeWidgetsProps {
+  userId: string;
+}

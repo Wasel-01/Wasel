@@ -268,6 +268,9 @@ export interface Database {
           name: string | null
           phone: string | null
           avatar_url: string | null
+          wallet_balance: number
+          total_earned: number
+          total_spent: number
         }
         Insert: {
           id: string
@@ -276,6 +279,9 @@ export interface Database {
           name?: string | null
           phone?: string | null
           avatar_url?: string | null
+          wallet_balance?: number
+          total_earned?: number
+          total_spent?: number
         }
         Update: {
           id?: string
@@ -284,6 +290,119 @@ export interface Database {
           name?: string | null
           phone?: string | null
           avatar_url?: string | null
+          wallet_balance?: number
+          total_earned?: number
+          total_spent?: number
+        }
+      }
+      messages: {
+        Row: {
+          id: string
+          created_at: string
+          sender_id: string
+          conversation_id: string
+          content: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          sender_id: string
+          conversation_id: string
+          content: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          sender_id?: string
+          conversation_id?: string
+          content?: string
+        }
+      }
+      referrals: {
+        Row: {
+          id: string
+          created_at: string
+          referrer_id: string
+          referred_id: string
+          referral_code: string
+          referrer_reward_amount: number
+          referred_reward_amount: number
+          campaign_id: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          referrer_id: string
+          referred_id: string
+          referral_code: string
+          referrer_reward_amount: number
+          referred_reward_amount: number
+          campaign_id?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          referrer_id?: string
+          referred_id?: string
+          referral_code?: string
+          referrer_reward_amount?: number
+          referred_reward_amount?: number
+          campaign_id?: string | null
+        }
+      }
+      campaign_participants: {
+        Row: {
+          id: string
+          created_at: string
+          user_id: string
+          campaign_id: string
+          participated_at: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          user_id: string
+          campaign_id: string
+          participated_at: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          user_id?: string
+          campaign_id?: string
+          participated_at?: string
+        }
+      }
+      user_rewards: {
+        Row: {
+          id: string
+          created_at: string
+          user_id: string
+          campaign_id: string | null
+          reward_type: string
+          amount: number
+          description: string
+          status: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          user_id: string
+          campaign_id?: string | null
+          reward_type: string
+          amount: number
+          description: string
+          status: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          user_id?: string
+          campaign_id?: string | null
+          reward_type?: string
+          amount?: number
+          description?: string
+          status?: string
         }
       }
     }
@@ -291,6 +410,22 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
+      check_schema_health: {
+        Args: Record<string, never>
+        Returns: boolean
+      }
+      get_conversation_messages_for_summary: {
+        Args: { conversation_id: string }
+        Returns: Json
+      }
+      get_user_stats: {
+        Args: { user_id: string }
+        Returns: Json
+      }
+      search_nearby_trips: {
+        Args: { lat: number; lng: number; radius: number }
+        Returns: Json
+      }
       get_referral_performance: {
         Args: { user_id: string }
         Returns: Json

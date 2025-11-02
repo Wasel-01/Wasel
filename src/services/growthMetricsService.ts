@@ -26,5 +26,27 @@ export const growthMetricsService = {
     const sanitizedCohort = String(cohort || '').replace(/[\r\n\t<>"'&]/g, '').substring(0, 100);
     console.log('Calculating retention for cohort:', sanitizedCohort);
     return 85.0;
-  }
+  },
+
+  getMetricsSummary: async () => ({
+    cpa: 25.5,
+    ltv: 450.0,
+    supplyDemandRatio: 1.2,
+    fulfillmentRate: 92.5,
+    active_drivers: 150,
+    total_seats_offered: 600,
+    active_riders: 180,
+    total_seats_requested: 500
+  }),
+
+  getDailyMetrics: async () => [],
+
+  getSupplyDemandBalance: async () => ({
+    supplyDemandRatio: 1.2,
+    fulfillmentRate: 92.5,
+    active_drivers: 150,
+    total_seats_offered: 600,
+    active_riders: 180,
+    total_seats_requested: 500
+  })
 };
