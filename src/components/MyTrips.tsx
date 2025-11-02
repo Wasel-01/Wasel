@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { LiveTripMap } from './LiveTripMap';
 
 export function MyTrips() {
-  const [selectedTripForTracking, setSelectedTripForTracking] = useState<any>(null);
+  const [selectedTripForTracking, setSelectedTripForTracking] = useState<unknown>(null);
   const [trackingDialogOpen, setTrackingDialogOpen] = useState(false);
 
   const handleTrackTrip = (trip: any) => {

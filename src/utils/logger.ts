@@ -2,7 +2,7 @@
  * Simple logger utility for production-safe logging
  */
 
-const isDevelopment = import.meta.env.DEV;
+const isDevelopment = (import.meta as any).env?.DEV;
 
 const sanitizeMessage = (message: string): string => {
   try {

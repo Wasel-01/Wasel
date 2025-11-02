@@ -14,14 +14,3 @@ export interface UserStats {
   preferredRoutes: string[];
   travelPatterns: unknown[];
 }
-
-export interface DashboardProps extends NavigationProps {}
-
-export interface PersonalizedInsightsProps {
-  userId: string;
-  userStats: UserStats;
-}
-
-export interface RealTimeWidgetsProps {
-  userId: string;
-}

@@ -7,7 +7,7 @@ import type { DashboardProps, UserStats } from '../types/components';
 
 
 
-export function Dashboard({ onNavigate }: DashboardProps) {
+export export default function Dashboard({ onNavigate }: DashboardProps) {
   const [activeTab, setActiveTab] = useState('overview');
   
   // Mock user stats for personalized insights

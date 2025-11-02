@@ -1,5 +1,6 @@
 export * from './database';
 export * from './components';
+export * from './vite-env';
 
 export interface ApiResponse<T = any> {
   data?: T;

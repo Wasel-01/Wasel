@@ -6,9 +6,9 @@ import { growthMetricsService } from '../services/growthMetricsService';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function GrowthMetricsDashboard() {
-  const [metrics, setMetrics] = useState<any>(null);
+  const [metrics, setMetrics] = useState<unknown>(null);
   const [dailyData, setDailyData] = useState<any[]>([]);
-  const [supplyDemand, setSupplyDemand] = useState<any>(null);
+  const [supplyDemand, setSupplyDemand] = useState<unknown>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
