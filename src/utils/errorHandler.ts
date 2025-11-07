@@ -31,10 +31,16 @@ export class NotFoundError extends Error {
 }
 
 export const handleApiError = (error: any, context?: string): AppError => {
-  // Sanitize error message to prevent log injection
+  // Sanitize error message to prevent XSS and log injection
   const sanitizeMessage = (msg: string): string => {
     return String(msg || 'Unknown error')
-      .replace(/[\r\n\t<>"'&\x00-\x1f\x7f-\x9f]/g, ' ')
+      .replace(/[\r\n\t<>"'`&\x00-\x1f\x7f-\x9f]/g, '')
+      .replace(/javascript:/gi, '')
+      .replace(/data:/gi, '')
+      .replace(/vbscript:/gi, '')
+      .replace(/on\w+=/gi, '')
+      .replace(/[\\]/g, '')
+      .trim()
       .substring(0, 500);
   };
 

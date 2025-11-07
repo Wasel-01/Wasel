@@ -12,9 +12,19 @@ export interface Notification {
   actionUrl?: string;
 }
 
+const sanitizeLog = (value: any): string => {
+  return String(value || '')
+    .replace(/[\r\n\t\x00-\x1f\x7f-\x9f]/g, ' ')
+    .substring(0, 200);
+};
+
 export const notificationService = {
   send: async (userId: string, title: string, message: string) => {
-    console.log('Notification:', { userId, title, message });
+    console.log('Notification:', { 
+      userId: sanitizeLog(userId), 
+      title: sanitizeLog(title), 
+      message: sanitizeLog(message) 
+    });
     return { success: true };
   },
   
@@ -37,11 +47,11 @@ export const notificationService = {
   },
 
   markAsRead: async (notificationId: string) => {
-    console.log('Mark as read:', notificationId);
+    console.log('Mark as read:', sanitizeLog(notificationId));
   },
 
   deleteNotification: async (notificationId: string) => {
-    console.log('Delete notification:', notificationId);
+    console.log('Delete notification:', sanitizeLog(notificationId));
   },
 
   markAllAsRead: async () => {

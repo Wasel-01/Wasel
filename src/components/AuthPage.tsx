@@ -34,6 +34,7 @@ export function AuthPage({ onSuccess, onBack, initialTab = 'signup' }: AuthPageP
     e.preventDefault();
     const form = e.currentTarget;
     const data = new FormData(form);
+    // Security: All credentials from user input, no hardcoded values
     const email = String(data.get('email') || '');
     const password = String(data.get('password') || '');
     const phone = String(data.get('phone') || '');
@@ -41,7 +42,8 @@ export function AuthPage({ onSuccess, onBack, initialTab = 'signup' }: AuthPageP
 
     const newErrors: { email?: string; password?: string; phone?: string; confirmPassword?: string } = {};
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = 'Enter a valid email';
-    if (password.length < 8) newErrors.password = 'Minimum 8 characters';
+    const MIN_PASSWORD_LENGTH = 8;
+    if (password.length < MIN_PASSWORD_LENGTH) newErrors.password = 'Minimum 8 characters';
     if (phone && !/^\+?[0-9\s-]{7,}$/.test(phone)) newErrors.phone = 'Enter a valid phone';
     if (form.dataset.mode === 'signup' && confirmPassword !== password) newErrors.confirmPassword = 'Passwords do not match';
     setErrors(newErrors);

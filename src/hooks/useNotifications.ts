@@ -59,28 +59,27 @@ export function useNotifications() {
           setNotifications(prev => [payload.new as Notification, ...prev]);
           setUnreadCount(prev => prev + 1);
 
-          // Show browser notification
+          // Show browser notification with XSS protection
           if ('Notification' in window && Notification.permission === 'granted') {
             try {
               const notif = payload.new as Notification;
-              const sanitizedTitle = String(notif.title || 'New notification')
-                .replace(/[<>"'&\r\n\t\x00-\x1f\x7f-\x9f]/g, '')
-                .replace(/javascript:/gi, '')
-                .replace(/data:/gi, '')
-                .substring(0, 100);
-              const sanitizedMessage = String(notif.message || '')
-                .replace(/[<>"'&\r\n\t\x00-\x1f\x7f-\x9f]/g, '')
-                .replace(/javascript:/gi, '')
-                .replace(/data:/gi, '')
-                .substring(0, 200);
-              new window.Notification(sanitizedTitle, {
-                body: sanitizedMessage,
+              const sanitizeText = (text: string, maxLen: number) => 
+                String(text || '')
+                  .replace(/[<>"'`&\r\n\t\x00-\x1f\x7f-\x9f]/g, '')
+                  .replace(/javascript:/gi, '')
+                  .replace(/data:/gi, '')
+                  .replace(/vbscript:/gi, '')
+                  .replace(/on\w+=/gi, '')
+                  .substring(0, maxLen);
+              
+              new window.Notification(sanitizeText(notif.title || 'New notification', 100), {
+                body: sanitizeText(notif.message || '', 200),
                 icon: '/wassel-logo.png',
                 tag: 'wasel-notification',
                 requireInteraction: false
               });
-            } catch (error) {
-              console.error('Failed to show notification:', error);
+            } catch {
+              // Notification failed silently
             }
           }
         }
