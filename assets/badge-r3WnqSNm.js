@@ -1,0 +1,1 @@
+import{j as e}from"./ui-CdBhIjHZ.js";import{e as o}from"./index-DCGLpGXa.js";function s({className:s,variant:n="default",...i}){return e.jsx("div",{className:o("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2",s),...i})}export{s as B};
