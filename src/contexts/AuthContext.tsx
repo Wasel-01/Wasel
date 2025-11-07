@@ -55,51 +55,57 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const profileData = await getUserProfile(userId);
       setProfile(profileData);
-    } catch (error) {
-      // Error fetching profile - silently fail
+    } catch {
       setProfile(null);
     }
   };
 
   // Initialize auth state
   useEffect(() => {
-    // If Supabase is not configured, just set loading to false
+    let mounted = true;
+
     if (!isSupabaseConfigured || !supabase) {
-      // Supabase not configured - running in demo mode
       setLoading(false);
       return;
     }
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchProfile(session.user.id);
+    // Fast initial load
+    const initAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!mounted) return;
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+        
+        // Fetch profile async after render
+        if (session?.user) {
+          fetchProfile(session.user.id);
+        }
+      } catch (err) {
+        if (mounted) setLoading(false);
       }
-      
-      setLoading(false);
-    });
+    };
 
-    // Listen for auth changes
+    initAuth();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: AuthChangeEvent, session: Session | null) => {
-        
+        if (!mounted) return;
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          fetchProfile(session.user.id);
         } else {
           setProfile(null);
         }
-        
-        setLoading(false);
       }
     );
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);

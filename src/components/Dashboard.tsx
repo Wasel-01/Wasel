@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import SmartDashboard from './SmartDashboard';
-import PersonalizedInsights from './PersonalizedInsights';
-import RealTimeWidgets from './RealTimeWidgets';
+
+const SmartDashboard = lazy(() => import('./SmartDashboard'));
+const PersonalizedInsights = lazy(() => import('./PersonalizedInsights'));
+const RealTimeWidgets = lazy(() => import('./RealTimeWidgets'));
 
 interface DashboardProps {
   onNavigate: (page: string) => void;
@@ -38,18 +39,21 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          <SmartDashboard onNavigate={onNavigate} />
+          <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div></div>}>
+            <SmartDashboard onNavigate={onNavigate} />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="insights" className="space-y-6">
-          <PersonalizedInsights
-            userId="user-123"
-            userStats={userStats}
-          />
+          <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div></div>}>
+            <PersonalizedInsights userId="user-123" userStats={userStats} />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="live" className="space-y-6">
-          <RealTimeWidgets userId="user-123" />
+          <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div></div>}>
+            <RealTimeWidgets userId="user-123" />
+          </Suspense>
         </TabsContent>
       </Tabs>
     </div>

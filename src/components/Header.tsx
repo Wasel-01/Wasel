@@ -38,10 +38,10 @@ export function Header({ onMenuClick, onNavigate }: HeaderProps) {
     const checkTimeForAutoSwitch = () => {
       const now = new Date();
       const hour = now.getHours();
-      const isNightTime = hour >= 18 || hour <= 6; // 6 PM to 6 AM
+      const isNightTime = hour >= 18 || hour <= 6;
 
       const savedTheme = localStorage.getItem('theme');
-      if (!savedTheme) { // Only auto-switch if no manual preference
+      if (!savedTheme) {
         const shouldBeDark = isNightTime;
         if (shouldBeDark !== isDarkMode) {
           setIsDarkMode(shouldBeDark);
@@ -50,12 +50,11 @@ export function Header({ onMenuClick, onNavigate }: HeaderProps) {
       }
     };
 
-    // Check immediately and then every hour
     checkTimeForAutoSwitch();
     const interval = setInterval(checkTimeForAutoSwitch, 60 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [isDarkMode]);
+  }, []);
 
   return (
     <header className="bg-white dark:bg-dark-bg border-b border-gray-200 dark:border-dark-border px-6 py-4 transition-smooth">

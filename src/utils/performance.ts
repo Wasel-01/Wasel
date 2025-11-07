@@ -1,219 +1,103 @@
-/**
- * Performance monitoring and optimization utilities
- */
+// Performance optimization utilities
 
-// Performance metrics collector
-export class PerformanceMonitor {
-  private metrics: Map<string, number[]> = new Map();
-  private observers: PerformanceObserver[] = [];
+// Debounce function for search/input
+export function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
 
-  constructor() {
-    this.initializeObservers();
-  }
-
-  private initializeObservers() {
-    if (typeof window === 'undefined') return;
-
-    try {
-      // Monitor navigation timing
-      const navObserver = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          if (entry.entryType === 'navigation') {
-            this.recordMetric('page_load', entry.duration);
-          }
-        }
-      });
-      navObserver.observe({ entryTypes: ['navigation'] });
-      this.observers.push(navObserver);
-
-      // Monitor resource loading
-      const resourceObserver = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          if (entry.entryType === 'resource') {
-            this.recordMetric(`resource_${entry.name.split('/').pop()}`, entry.duration);
-          }
-        }
-      });
-      resourceObserver.observe({ entryTypes: ['resource'] });
-      this.observers.push(resourceObserver);
-
-      // Monitor user interactions
-      const measureObserver = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          if (entry.entryType === 'measure') {
-            this.recordMetric(entry.name, entry.duration);
-          }
-        }
-      });
-      measureObserver.observe({ entryTypes: ['measure'] });
-      this.observers.push(measureObserver);
-    } catch (error) {
-      console.warn('Performance monitoring not supported:', error);
+// Throttle function for scroll/resize
+export function throttle<T extends (...args: any[]) => any>(
+  func: T,
+  limit: number
+): (...args: Parameters<T>) => void {
+  let inThrottle: boolean;
+  return (...args: Parameters<T>) => {
+    if (!inThrottle) {
+      func(...args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
     }
+  };
+}
+
+// Cache API responses
+const cache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+export function getCached<T>(key: string): T | null {
+  const cached = cache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data;
   }
+  cache.delete(key);
+  return null;
+}
 
-  recordMetric(name: string, value: number) {
-    const sanitizedName = String(name || '').replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 50);
-    if (!this.metrics.has(sanitizedName)) {
-      this.metrics.set(sanitizedName, []);
-    }
-    
-    const values = this.metrics.get(sanitizedName)!;
-    values.push(value);
-    
-    // Keep only last 100 measurements
-    if (values.length > 100) {
-      values.shift();
-    }
-  }
+export function setCache<T>(key: string, data: T): void {
+  cache.set(key, { data, timestamp: Date.now() });
+}
 
-  getMetrics(name: string) {
-    const values = this.metrics.get(name) || [];
-    if (values.length === 0) return null;
-
-    const sorted = [...values].sort((a, b) => a - b);
-    return {
-      count: values.length,
-      min: sorted[0],
-      max: sorted[sorted.length - 1],
-      avg: values.reduce((sum, val) => sum + val, 0) / values.length,
-      p50: sorted[Math.floor(sorted.length * 0.5)],
-      p95: sorted[Math.floor(sorted.length * 0.95)],
-      p99: sorted[Math.floor(sorted.length * 0.99)]
-    };
-  }
-
-  getAllMetrics() {
-    const result: Record<string, any> = {};
-    for (const [name] of this.metrics) {
-      result[name] = this.getMetrics(name);
-    }
-    return result;
-  }
-
-  cleanup() {
-    this.observers.forEach(observer => observer.disconnect());
-    this.observers = [];
-    this.metrics.clear();
+export function clearCache(key?: string): void {
+  if (key) {
+    cache.delete(key);
+  } else {
+    cache.clear();
   }
 }
 
-// API performance wrapper
-export const withPerformanceTracking = <T extends (...args: any[]) => Promise<any>>(
-  fn: T,
-  name: string
-): T => {
-  return (async (...args: any[]) => {
-    const start = performance.now();
-    try {
-      const result = await fn(...args);
-      const duration = performance.now() - start;
-      performanceMonitor.recordMetric(`api_${name}`, duration);
-      return result;
-    } catch (error) {
-      const duration = performance.now() - start;
-      performanceMonitor.recordMetric(`api_${name}_error`, duration);
-      throw error;
-    }
-  }) as T;
-};
+// Lazy load images
+export function lazyLoadImage(src: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(src);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
 
-// Component performance wrapper
-export const measureComponentRender = (componentName: string) => {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-    const originalMethod = descriptor.value;
-    
-    descriptor.value = function (...args: any[]) {
-      const start = performance.now();
-      const result = originalMethod.apply(this, args);
-      const duration = performance.now() - start;
-      performanceMonitor.recordMetric(`component_${componentName}`, duration);
-      return result;
-    };
-    
-    return descriptor;
-  };
-};
+// Batch API calls
+let batchQueue: Array<() => Promise<any>> = [];
+let batchTimeout: NodeJS.Timeout;
 
-// Memory usage monitoring
-export const getMemoryUsage = () => {
-  if (typeof window === 'undefined' || !('memory' in performance)) {
-    return null;
-  }
-
-  const memory = (performance as any).memory;
-  return {
-    used: Math.round(memory.usedJSHeapSize / 1024 / 1024), // MB
-    total: Math.round(memory.totalJSHeapSize / 1024 / 1024), // MB
-    limit: Math.round(memory.jsHeapSizeLimit / 1024 / 1024), // MB
-    usage: Math.round((memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100) // %
-  };
-};
-
-// Bundle size analyzer
-export const analyzeBundleSize = () => {
-  if (typeof window === 'undefined') return null;
-
-  const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
-  const jsResources = resources.filter(r => r.name.endsWith('.js'));
-  const cssResources = resources.filter(r => r.name.endsWith('.css'));
-
-  return {
-    totalJS: jsResources.reduce((sum, r) => sum + (r.transferSize || 0), 0),
-    totalCSS: cssResources.reduce((sum, r) => sum + (r.transferSize || 0), 0),
-    jsFiles: jsResources.length,
-    cssFiles: cssResources.length,
-    largestJS: Math.max(...jsResources.map(r => r.transferSize || 0)),
-    largestCSS: Math.max(...cssResources.map(r => r.transferSize || 0))
-  };
-};
-
-// Core Web Vitals monitoring
-export const measureCoreWebVitals = () => {
-  if (typeof window === 'undefined') return;
-
-  // Largest Contentful Paint
-  new PerformanceObserver((list) => {
-    const entries = list.getEntries();
-    const lastEntry = entries[entries.length - 1];
-    performanceMonitor.recordMetric('lcp', lastEntry.startTime);
-  }).observe({ entryTypes: ['largest-contentful-paint'] });
-
-  // First Input Delay
-  new PerformanceObserver((list) => {
-    for (const entry of list.getEntries()) {
-      const fidEntry = entry as any;
-      const fid = fidEntry.processingStart - entry.startTime;
-      performanceMonitor.recordMetric('fid', fid);
-    }
-  }).observe({ entryTypes: ['first-input'] });
-
-  // Cumulative Layout Shift
-  let clsValue = 0;
-  new PerformanceObserver((list) => {
-    for (const entry of list.getEntries()) {
-      if (!(entry as any).hadRecentInput) {
-        clsValue += (entry as any).value;
+export function batchRequest<T>(request: () => Promise<T>): Promise<T> {
+  return new Promise((resolve, reject) => {
+    batchQueue.push(async () => {
+      try {
+        const result = await request();
+        resolve(result);
+      } catch (error) {
+        reject(error);
       }
-    }
-    performanceMonitor.recordMetric('cls', clsValue);
-  }).observe({ entryTypes: ['layout-shift'] });
-};
+    });
 
-// Global performance monitor instance
-export const performanceMonitor = new PerformanceMonitor();
-
-// Initialize Core Web Vitals monitoring
-if (typeof window !== 'undefined') {
-  measureCoreWebVitals();
+    clearTimeout(batchTimeout);
+    batchTimeout = setTimeout(async () => {
+      const queue = [...batchQueue];
+      batchQueue = [];
+      await Promise.all(queue.map(fn => fn()));
+    }, 50);
+  });
 }
 
-export default {
-  PerformanceMonitor,
-  withPerformanceTracking,
-  measureComponentRender,
-  getMemoryUsage,
-  analyzeBundleSize,
-  measureCoreWebVitals,
-  performanceMonitor
-};
+// Measure performance
+export function measurePerformance(name: string, fn: () => void): void {
+  const start = performance.now();
+  fn();
+  const end = performance.now();
+  console.log(`⚡ ${name}: ${(end - start).toFixed(2)}ms`);
+}
+
+// Prefetch route
+export function prefetchRoute(path: string): void {
+  const link = document.createElement('link');
+  link.rel = 'prefetch';
+  link.href = path;
+  document.head.appendChild(link);
+}

@@ -2,6 +2,7 @@ import { supabase } from '../utils/supabase/client';
 import { handleApiError, ValidationError, AuthenticationError, NotFoundError, validateInput } from '../utils/errorHandler';
 import { getConfig } from '../config/app';
 import { sanitize, secureValidate } from '../utils/security';
+import { getCached, setCache, debounce } from '../utils/performance';
 
 const config = getConfig();
 
@@ -149,7 +150,11 @@ export const tripsAPI = {
   },
 
   async searchTrips(from?: string, to?: string, date?: string) {
-    let query = supabase.from('trips').select('*');
+    const cacheKey = `trips:${from}:${to}:${date}`;
+    const cached = getCached(cacheKey);
+    if (cached) return cached;
+
+    let query = supabase.from('trips').select('*').limit(50);
 
     if (from) query = query.ilike('from_location', `%${from}%`);
     if (to) query = query.ilike('to_location', `%${to}%`);
@@ -157,6 +162,8 @@ export const tripsAPI = {
 
     const { data, error } = await query;
     if (error) throw error;
+    
+    setCache(cacheKey, data);
     return data;
   },
 
@@ -300,6 +307,10 @@ export const messagesAPI = {
 
 export const walletAPI = {
   async getWallet() {
+    const cacheKey = 'wallet:current';
+    const cached = getCached(cacheKey);
+    if (cached) return cached;
+
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Not authenticated');
 
@@ -312,12 +323,15 @@ export const walletAPI = {
     if (error) throw error;
     if (!data) throw new Error('Profile not found');
 
-    return {
+    const result = {
       user_id: data.id,
       balance: data.wallet_balance || 0,
       total_earned: data.total_earned || 0,
       total_spent: data.total_spent || 0
     };
+    
+    setCache(cacheKey, result);
+    return result;
   },
 
   async addFunds(amount: number) {

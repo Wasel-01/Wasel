@@ -45,7 +45,6 @@ export default function AdvancedMapNavigation({
   useEffect(() => {
     if (!mapRef.current) return;
 
-    // Create advanced 3D map
     const initMap = async () => {
       const mapboxgl = await import('mapbox-gl');
       
@@ -141,7 +140,7 @@ export default function AdvancedMapNavigation({
     };
 
     initMap();
-  }, [mapStyle, isNavigating]);
+  }, [mapStyle, isNavigating, origin, destination, waypoints, heading, navigationSteps]);
 
   const getMapStyle = (style: string) => {
     switch (style) {

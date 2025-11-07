@@ -1,22 +1,22 @@
-import { useState, Suspense, lazy } from 'react';
+import { useState, Suspense, lazy, memo } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
-// Lazy load components for code splitting
-const LandingPage = lazy(() => import('./components/LandingPage').then(module => ({ default: module.LandingPage })));
-const AuthPage = lazy(() => import('./components/AuthPage').then(module => ({ default: module.AuthPage })));
-const Dashboard = lazy(() => import('./components/Dashboard').then(module => ({ default: module.default })));
-const Header = lazy(() => import('./components/Header').then(module => ({ default: module.Header })));
-const Sidebar = lazy(() => import('./components/Sidebar').then(module => ({ default: module.Sidebar })));
-const FindRide = lazy(() => import('./components/FindRide').then(module => ({ default: module.FindRide })));
-const OfferRide = lazy(() => import('./components/OfferRide').then(module => ({ default: module.OfferRide })));
-const MyTrips = lazy(() => import('./components/MyTrips').then(module => ({ default: module.MyTrips })));
-const Messages = lazy(() => import('./components/Messages').then(module => ({ default: module.Messages })));
-const Payments = lazy(() => import('./components/Payments').then(module => ({ default: module.Payments })));
-const Settings = lazy(() => import('./components/Settings').then(module => ({ default: module.Settings })));
-const UserProfile = lazy(() => import('./components/UserProfile').then(module => ({ default: module.UserProfile })));
-const SafetyCenter = lazy(() => import('./components/SafetyCenter').then(module => ({ default: module.SafetyCenter })));
-const ReferralProgram = lazy(() => import('./components/ReferralProgram').then(module => ({ default: module.ReferralProgram })));
+// Lazy load with prefetch hints
+const LandingPage = lazy(() => import(/* webpackPrefetch: true */ './components/LandingPage').then(m => ({ default: m.LandingPage })));
+const AuthPage = lazy(() => import(/* webpackPrefetch: true */ './components/AuthPage').then(m => ({ default: m.AuthPage })));
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const Header = lazy(() => import('./components/Header').then(m => ({ default: m.Header })));
+const Sidebar = lazy(() => import('./components/Sidebar').then(m => ({ default: m.Sidebar })));
+const FindRide = lazy(() => import('./components/FindRide').then(m => ({ default: m.FindRide })));
+const OfferRide = lazy(() => import('./components/OfferRide').then(m => ({ default: m.OfferRide })));
+const MyTrips = lazy(() => import('./components/MyTrips').then(m => ({ default: m.MyTrips })));
+const Messages = lazy(() => import('./components/Messages').then(m => ({ default: m.Messages })));
+const Payments = lazy(() => import('./components/Payments').then(m => ({ default: m.Payments })));
+const Settings = lazy(() => import('./components/Settings').then(m => ({ default: m.Settings })));
+const UserProfile = lazy(() => import('./components/UserProfile').then(m => ({ default: m.UserProfile })));
+const SafetyCenter = lazy(() => import('./components/SafetyCenter').then(m => ({ default: m.SafetyCenter })));
+const ReferralProgram = lazy(() => import('./components/ReferralProgram').then(m => ({ default: m.ReferralProgram })));
 
 type Page = 
   | 'landing'
@@ -38,15 +38,12 @@ function AppContent() {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Loading fallback component
-  const LoadingFallback = () => (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading...</p>
-      </div>
+  // Optimized loading fallback
+  const LoadingFallback = memo(() => (
+    <div className="flex items-center justify-center h-64">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
     </div>
-  );
+  ));
 
   const handleNavigate = (page: string) => {
     setCurrentPage(page as Page);
@@ -68,14 +65,7 @@ function AppContent() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingFallback />;
   }
 
   // Show landing page if not authenticated
