@@ -469,7 +469,8 @@
     "zeplin",
     "zettlr",
     "zoho",
-    "zoom"
+    "zoom",
+    "واصل"
   ],
   "ignorePaths": [
     "node_modules/**",
